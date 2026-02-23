@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,7 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
   const [importing, setImporting] = useState(false);
   const [results, setResults] = useState(null);
   const [importMode, setImportMode] = useState(null); // 'monzo' or 'generic'
+  const fileInputRef = useRef(null);
 
   const currentProfile = localStorage.getItem('currentProfile');
 
@@ -157,6 +158,10 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
       setColumnMapping({ ...columnMapping, ...autoMapping });
       setStep(2);
     }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
   };
 
   const parseMonzoDate = (dateStr) => {
@@ -372,17 +377,24 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
                 <p className="text-sm text-slate-400 mb-4">
                   Select a CSV file with your transaction data
                 </p>
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    accept=".csv"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  <Button className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white">
-                    Choose File
-                  </Button>
-                </label>
+                
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                
+                {/* Button triggers file input */}
+                <Button 
+                  onClick={triggerFileInput}
+                  className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Choose File
+                </Button>
               </div>
 
               <div className="glass-card p-4 rounded-xl border border-white/5">
