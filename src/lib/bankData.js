@@ -146,11 +146,13 @@ export const fetchBankTransactions = async () => {
   }
 };
 
-// Get total balance from all accounts
+// Get total balance from all accounts (includes overdraft)
 export const getTotalBankBalance = () => {
   const accounts = getBankAccounts();
   return accounts.reduce((total, account) => {
-    return total + (account.balance?.available || account.balance?.current || 0);
+    const available = account.balance?.available || account.balance?.current || 0;
+    const overdraft = account.balance?.overdraft || 0;
+    return total + available + overdraft;
   }, 0);
 };
 
@@ -247,6 +249,29 @@ export const checkBankConnection = async () => {
   } catch (error) {
     console.error('Error checking connection status:', error);
     return { connected: false };
+  }
+};
+
+// Refresh bank connection (auto-reconnect if needed)
+export const refreshBankConnection = async () => {
+  try {
+    // First try to refresh the token
+    const refreshResponse = await fetch(`${API_BASE}/auth/truelayer/refresh`, { method: 'POST' });
+    const refreshData = await refreshResponse.json();
+    
+    if (refreshData.success) {
+      return { success: true, reconnected: false };
+    }
+    
+    // If refresh failed, need to reconnect
+    console.log('Token refresh failed, initiating auto-reconnect...');
+    window.location.href = `${API_BASE}/auth/truelayer`;
+    return { success: false, reconnected: true };
+  } catch (error) {
+    console.error('Error refreshing connection, auto-reconnecting...', error);
+    // Auto-reconnect by redirecting to OAuth
+    window.location.href = `${API_BASE}/auth/truelayer`;
+    return { success: false, reconnected: true };
   }
 };
 
@@ -378,9 +403,11 @@ export const filterAccountsByBank = (accounts, selectedValue) => {
   }
 };
 
-// Get total balance from filtered accounts
+// Get total balance from filtered accounts (includes overdraft)
 export const getFilteredBankBalance = (accounts) => {
   return accounts.reduce((total, account) => {
-    return total + (account.balance?.available || account.balance?.current || 0);
+    const available = account.balance?.available || account.balance?.current || 0;
+    const overdraft = account.balance?.overdraft || 0;
+    return total + available + overdraft;
   }, 0);
 };

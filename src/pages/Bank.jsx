@@ -18,7 +18,8 @@ import {
   getAccountDisplayName,
   groupAccountsByBank,
   saveAccountNameMapping,
-  getAccountCustomName
+  getAccountCustomName,
+  refreshBankConnection
 } from '@/lib/bankData';
 
 const API_BASE = 'http://localhost:3001';
@@ -74,6 +75,16 @@ export default function Bank() {
   const handleRefresh = async () => {
     setIsLoading(true);
     try {
+      // First try to refresh the connection (auto-reconnect if needed)
+      const refreshResult = await refreshBankConnection();
+      
+      // If reconnect was triggered, the page will redirect, so don't continue
+      if (refreshResult.reconnected) {
+        setIsLoading(false);
+        return;
+      }
+      
+      // Otherwise fetch fresh data
       const apiAccounts = await fetchBankAccounts();
       await fetchBankTransactions();
       setAccounts(apiAccounts);
@@ -183,6 +194,7 @@ export default function Bank() {
               onClick={handleRefresh}
               disabled={isLoading}
               variant="outline"
+              title={isLoading ? "Refreshing..." : "Refresh (will auto-reconnect if needed)"}
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

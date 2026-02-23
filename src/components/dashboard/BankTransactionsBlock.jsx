@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowUpRight, ArrowDownRight, CreditCard, Loader2, Building2 } from 'lucide-react';
-import { getBankTransactions, getTransactionsByCategory, checkBankConnection } from '@/lib/bankData';
+import { ArrowUpRight, ArrowDownRight, CreditCard, Loader2, Building2, RefreshCw } from 'lucide-react';
+import { 
+  getBankTransactions, 
+  getTransactionsByCategory, 
+  checkBankConnection,
+  fetchBankTransactions,
+  refreshBankConnection
+} from '@/lib/bankData';
 
 const CATEGORY_ICONS = {
   'Food & Dining': '🍔',
@@ -21,6 +27,7 @@ export default function BankTransactionsBlock({ currency = 'GBP', limit = 10, tr
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     loadTransactions();
@@ -47,6 +54,30 @@ export default function BankTransactionsBlock({ currency = 'GBP', limit = 10, tr
     }
     
     setLoading(false);
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      // First try to refresh the connection (auto-reconnect if needed)
+      const refreshResult = await refreshBankConnection();
+      
+      // If reconnect was triggered, the page will redirect, so don't continue
+      if (refreshResult.reconnected) {
+        setIsRefreshing(false);
+        return;
+      }
+      
+      // Otherwise fetch fresh data
+      const fetchedTransactions = await fetchBankTransactions();
+      
+      // Sort by date descending
+      const sorted = fetchedTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+      setTransactions(sorted.slice(0, limit));
+    } catch (error) {
+      console.error('Error refreshing transactions:', error);
+    }
+    setIsRefreshing(false);
   };
 
   const formatDate = (dateString) => {
@@ -93,14 +124,28 @@ export default function BankTransactionsBlock({ currency = 'GBP', limit = 10, tr
 
   return (
     <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
-          <CreditCard className="h-5 w-5 text-purple-400" />
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+            <CreditCard className="h-5 w-5 text-purple-400" />
+          </div>
+          <div>
+            <h3 className="text-white font-medium">Bank Transactions</h3>
+            <p className="text-slate-400 text-sm">Latest from your bank</p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-white font-medium">Bank Transactions</h3>
-          <p className="text-slate-400 text-sm">Latest from your bank</p>
-        </div>
+        <button
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+          title={isRefreshing ? "Refreshing..." : "Refresh (will auto-reconnect if needed)"}
+        >
+          {isRefreshing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
+        </button>
       </div>
 
       {transactions.length === 0 ? (

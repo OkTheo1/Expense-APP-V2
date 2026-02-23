@@ -7,7 +7,8 @@ import {
   fetchBankTransactions,
   getTotalBankBalance,
   getTransactionsByCategory,
-  checkBankConnection
+  checkBankConnection,
+  refreshBankConnection
 } from '@/lib/bankData';
 
 export default function BankBalanceBlock({ currency = 'GBP', accounts: propAccounts = null, balance: propBalance = null }) {
@@ -73,6 +74,16 @@ export default function BankBalanceBlock({ currency = 'GBP', accounts: propAccou
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
+      // First try to refresh the connection (auto-reconnect if needed)
+      const refreshResult = await refreshBankConnection();
+      
+      // If reconnect was triggered, the page will redirect, so don't continue
+      if (refreshResult.reconnected) {
+        setIsRefreshing(false);
+        return;
+      }
+      
+      // Otherwise fetch fresh data
       const [fetchedAccounts, fetchedTransactions] = await Promise.all([
         fetchBankAccounts(),
         fetchBankTransactions()
@@ -140,6 +151,7 @@ export default function BankBalanceBlock({ currency = 'GBP', accounts: propAccou
           onClick={handleRefresh}
           disabled={isRefreshing}
           className="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+          title={isRefreshing ? "Refreshing..." : "Refresh (will auto-reconnect if needed)"}
         >
           {isRefreshing ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -155,22 +167,29 @@ export default function BankBalanceBlock({ currency = 'GBP', accounts: propAccou
       </div>
 
       <div className="space-y-3">
-        {accounts.map((account, index) => (
-          <div key={index} className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg">
-            <div className="flex items-center gap-3">
-              <Building2 className="h-4 w-4 text-slate-400" />
-              <div>
-                <p className="text-white text-sm font-medium">{account.display_name}</p>
-                <p className="text-slate-500 text-xs">
-                  •••• {account.account_number?.account_particulars?.slice(-4) || '****'}
-                </p>
+        {accounts.map((account, index) => {
+          const available = account.balance?.available || account.balance?.current || 0;
+          const overdraft = account.balance?.overdraft || 0;
+          const displayBalance = available + overdraft;
+          
+          return (
+            <div key={index} className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg">
+              <div className="flex items-center gap-3">
+                <Building2 className="h-4 w-4 text-slate-400" />
+                <div>
+                  <p className="text-white text-sm font-medium">{account.display_name}</p>
+                  <p className="text-slate-500 text-xs">
+                    •••• {account.account_number?.account_particulars?.slice(-4) || '****'}
+                    {overdraft > 0 && <span className="ml-2 text-amber-400"> overdraft: £{overdraft}</span>}
+                  </p>
+                </div>
               </div>
+              <p className="text-white font-medium">
+                {formatCurrency(displayBalance)}
+              </p>
             </div>
-            <p className="text-white font-medium">
-              {formatCurrency(account.balance?.available || account.balance?.current || 0)}
-            </p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

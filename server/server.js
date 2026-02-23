@@ -286,6 +286,35 @@ async function getAllTransactions() {
     // Fetch transactions for each account
     for (const account of connection.accounts) {
       try {
+        // Calculate the from date - use account creation date or 10 years back
+        let fromDate;
+        const now = new Date();
+        
+        // Try to get account creation date from the account object
+        // TrueLayer may provide this in various formats
+        if (account.created_at) {
+          fromDate = new Date(account.created_at);
+        } else if (account.creation_date) {
+          fromDate = new Date(account.creation_date);
+        } else if (account.opening_date) {
+          fromDate = new Date(account.opening_date);
+        } else {
+          // Default to 10 years ago if no creation date available
+          fromDate = new Date(now.getFullYear() - 10, now.getMonth(), now.getDate());
+        }
+        
+        // Don't go future dates
+        if (fromDate > now) {
+          fromDate = now;
+        }
+        
+        // Calculate how far back we're fetching (for logging)
+        const daysBack = Math.floor((now - fromDate) / (1000 * 60 * 60 * 24));
+        console.log(`Fetching transactions for account ${account.account_id} from ${fromDate.toISOString().split('T')[0]} (${daysBack} days back)`);
+        
+        // Format date as YYYY-MM-DD
+        const fromDateStr = fromDate.toISOString().split('T')[0];
+        
         const response = await axios.get(
           `${TRUELAYER_API_URL}data/v1/accounts/${account.account_id}/transactions`,
           {
@@ -293,12 +322,15 @@ async function getAllTransactions() {
               'Authorization': `Bearer ${connection.accessToken}`
             },
             params: {
-              from: '90daysago'
+              from: fromDateStr,
+              to: now.toISOString().split('T')[0]
             }
           }
         );
 
         const transactions = response.data.results || [];
+        
+        console.log(`  Fetched ${transactions.length} transactions for account ${account.display_name}`);
         
         // Normalize transactions
         const normalized = transactions.map(tx => ({
@@ -325,6 +357,8 @@ async function getAllTransactions() {
 
   // Sort by date descending
   allTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  console.log(`=== Total transactions fetched: ${allTransactions.length} ===`);
   return allTransactions;
 }
 

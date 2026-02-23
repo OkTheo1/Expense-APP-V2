@@ -1,0 +1,17 @@
+Transaction ID,Date,Time,Type,Name,Emoji,Category,Amount,Currency,Local amount,Local currency,Notes and #tags,Address,Receipt,Description,Category split,Money Out,Money In
+tx_0000B0iSbrHdlH1XmzmRV4,28/11/2025,21:00:55,Flex,Swarovski,⌚️,Shopping,-85.05,GBP,-85.05,GBP,Paid for by Flex,,,Flex,,-85.05,
+tx_0000B0iSdRcy7XEmCp41E9,28/11/2025,21:01:12,Flex,Gymshark,👟,Shopping,-54.08,GBP,-54.08,GBP,Paid for by Flex,,,Flex,,-54.08,
+tx_0000B1Nseh0oyBnaOOoNXt,18/12/2025,20:35:56,Card payment,BP,⛽️,Transport,-30.05,GBP,-30.05,GBP,,The Harrow Way,,BP GROVE ROAD F/STN    BASINGSTOKE H GBR,,-30.05,
+tx_0000B1PWTvTf2TqGyEkZ6H,19/12/2025,15:36:53,Flex,,,Transfers,139.13,GBP,139.13,GBP,"Early payment towards Swarovski, Gymshark",,,Flex,,,139.13
+tx_0000B1PWWrApUqw1pxPiZF,19/12/2025,15:37:25,Flex,,,Transfers,30.05,GBP,30.05,GBP,Early payment towards BP,,,Flex,,,30.05
+tx_0000B21O5c1IJXDOhkYHWD,06/01/2026,22:01:53,Card payment,Temu,🛍️,Shopping,-116.46,GBP,-116.46,GBP,,"5 Churchill Place, 10th Floor",,Temu.com               London        GBR,,-116.46,
+tx_0000B21hllcqt9P95gxmcc,07/01/2026,01:42:24,Card payment,Temu,🛍️,Shopping,116.46,GBP,116.46,GBP,,1 Bartholomew Lane,,"Temu.com\5 Churchill Place, 10th Floor\London\E14 5HU   GBRGBR",,,116.46
+tx_0000B25aZSpL28Wydv84hO,08/01/2026,22:40:35,Flex,easyJet,🛩,Holidays,-169.70,GBP,-169.70,GBP,Paid for by Flex,,,Flex,,-169.70,
+tx_0000B2Hmid63kblnumtbl3,14/01/2026,19:53:14,Flex,Vinted,👕,Shopping,-40.44,GBP,-40.44,GBP,Paid for by Flex,,,Flex,,-40.44,
+tx_0000B2KW3kLorLVnVGCyR8,16/01/2026,03:30:42,Flex,,,Transfers,40.44,GBP,40.44,GBP,Early payment towards Vinted,,,Flex,,,40.44
+tx_0000B2O5hM9ELQEMPVnoQc,17/01/2026,20:54:10,Card payment,Uber Eats,🍽,Eating out,-54.62,GBP,-62.91,EUR,,Mr Treublaan 7                               ,,UBER   * EATS PENDING  Amsterdam     NLD,,-54.62,
+tx_0000B2aTBcWEfgzbhFGbhq,23/01/2026,20:13:54,Flex,Asda Petrol,⛽️,Transport,-22.00,GBP,-22.00,GBP,Paid for by Flex,,,Flex,,-22.00,
+tx_0000B2nizqbqa7YaQadjAS,30/01/2026,05:42:18,Flex,,,Transfers,224.32,GBP,224.32,GBP,"Early payment towards easyJet, Uber Eats",,,Flex,,,224.32
+tx_0000B2nj0xGHKoJHpTOUwD,30/01/2026,05:42:30,Flex,,,Transfers,22.00,GBP,22.00,GBP,Early payment towards Asda Petrol,,,Flex,,,22.00
+tx_0000B3JZZQTqQP4VzscGpP,14/02/2026,14:27:26,Flex,McDonald’s,🍔,Eating out,-14.26,GBP,-14.26,GBP,Paid for by Flex,,,Flex,,-14.26,
+tx_0000B3JZe3yxV2xibdKiZd,14/02/2026,14:28:16,Flex,Domino’s,🍕,Eating out,-11.28,GBP,-11.28,GBP,Paid for by Flex,,,Flex,,-11.28,
