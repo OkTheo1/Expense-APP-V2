@@ -577,7 +577,7 @@ export default function Dashboard() {
                   <TrendingUp className="h-5 w-5 text-green-400" />
                 </div>
                 <div>
-                  <p className="text-slate-400 text-sm">Income (Filtered)</p>
+                  <p className="text-slate-400 text-sm">Income (Bank)</p>
                   <p className="text-xl font-semibold text-green-400">
                     {formatAmount(filteredByBankTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0))}
                   </p>
@@ -592,7 +592,7 @@ export default function Dashboard() {
                   <TrendingDown className="h-5 w-5 text-red-400" />
                 </div>
                 <div>
-                  <p className="text-slate-400 text-sm">Expenses (Filtered)</p>
+                  <p className="text-slate-400 text-sm">Expenses (Bank)</p>
                   <p className="text-xl font-semibold text-red-400">
                     {formatAmount(filteredByBankTransactions.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0))}
                   </p>
@@ -613,165 +613,6 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Connected Accounts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {banks.map(bankName => (
-            <Card key={bankName} className="bg-slate-900/50 border-slate-800">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-white">
-                  <Building2 className="h-5 w-5 text-teal-400" />
-                  {bankName}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {groupedAccounts[bankName].map((account, index) => (
-                  <div key={index} className="bg-slate-800/50 rounded-lg p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        {editingAccountId === account.account_id ? (
-                          <div className="flex items-center gap-2">
-                            <Input
-                              value={editCustomName}
-                              onChange={(e) => setEditCustomName(e.target.value)}
-                              placeholder="Enter custom name..."
-                              className="bg-slate-700 border-slate-600 text-white text-sm h-8"
-                            />
-                            <Button 
-                              size="sm" 
-                              onClick={() => handleSaveAccountName(account.account_id)}
-                              className="h-8 bg-green-600 hover:bg-green-700"
-                            >
-                              <Save className="h-3 w-3" />
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              onClick={handleCancelEdit}
-                              className="h-8"
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <p className="text-white font-medium">
-                              {getAccountCustomName(account.account_id) || getAccountTypeName(account)}
-                            </p>
-                            <button
-                              onClick={() => handleEditAccountName(account)}
-                              className="text-slate-400 hover:text-white"
-                            >
-                              <Edit2 className="h-3 w-3" />
-                            </button>
-                          </div>
-                        )}
-                        <p className="text-slate-400 text-xs mt-1">
-                          •••• {account.account_number?.account_particulars?.slice(-4) || account.account_id?.slice(-4) || '****'}
-                        </p>
-                        {account.balance && (
-                          <p className="text-green-400 text-sm mt-1">
-                            {formatAmount(account.balance.available || account.balance.current || 0)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Bank Transactions Filters */}
-        <div className="flex flex-wrap gap-4 mb-6">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-slate-400" />
-            <Select value={bankFilter} onValueChange={setBankFilter}>
-              <SelectTrigger className="w-48 bg-slate-800 border-slate-700">
-                <SelectValue placeholder="Filter by time" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                <SelectItem value="all" className="text-slate-200">All Time</SelectItem>
-                <SelectItem value="this-month" className="text-slate-200">This Month</SelectItem>
-                <SelectItem value="last-month" className="text-slate-200">Last Month</SelectItem>
-                <SelectItem value="last-3-months" className="text-slate-200">Last 3 Months</SelectItem>
-                <SelectItem value="this-year" className="text-slate-200">This Year</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-slate-400" />
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-48 bg-slate-800 border-slate-700">
-                <SelectValue placeholder="Filter by category" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                <SelectItem value="all" className="text-slate-200">All Categories</SelectItem>
-                {availableCategories.map(cat => (
-                  <SelectItem key={cat} value={cat} className="text-slate-200">
-                    {CATEGORY_ICONS[cat] || '📦'} {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {(bankFilter !== 'all' || categoryFilter !== 'all') && (
-            <Button 
-              variant="ghost" 
-              onClick={() => { setBankFilter('all'); setCategoryFilter('all'); }}
-              className="text-slate-400 hover:text-white"
-            >
-              Clear Filters
-            </Button>
-          )}
-        </div>
-
-        {/* Bank Transactions Table */}
-        <div className="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden mb-8">
-          <div className="overflow-x-auto max-h-[400px]">
-            <table className="w-full">
-              <thead className="sticky top-0 bg-slate-900">
-                <tr className="border-b border-slate-800">
-                  <th className="text-left p-4 text-slate-400 text-sm font-medium">Date</th>
-                  <th className="text-left p-4 text-slate-400 text-sm font-medium">Description</th>
-                  <th className="text-left p-4 text-slate-400 text-sm font-medium">Category</th>
-                  <th className="text-right p-4 text-slate-400 text-sm font-medium">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredByBankTransactions.length > 0 ? (
-                  filteredByBankTransactions.slice(0, 50).map((tx) => (
-                    <tr key={tx.id} className="border-b border-slate-800/50 hover:bg-slate-800/30">
-                      <td className="p-4 text-white text-sm">{formatDate(tx.date)}</td>
-                      <td className="p-4 text-white text-sm max-w-[200px] truncate">
-                        {tx.merchant || tx.description}
-                      </td>
-                      <td className="p-4 text-slate-400 text-sm">
-                        <span className="bg-slate-800 px-2 py-1 rounded text-xs">
-                          {CATEGORY_ICONS[tx.category] || '❓'} {tx.category || 'Uncategorized'}
-                        </span>
-                      </td>
-                      <td className={`p-4 text-sm text-right font-medium ${
-                        tx.amount < 0 ? 'text-red-400' : 'text-green-400'
-                      }`}>
-                        {formatAmount(tx.amount)}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="p-8 text-center text-slate-400">
-                      No transactions found for the selected filters
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
         </div>
 
         {/* Draggable Blocks Grid */}
