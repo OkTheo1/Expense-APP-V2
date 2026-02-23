@@ -31,6 +31,8 @@ const MONZO_CATEGORY_MAP = {
   'Transfers': 'Transfer'
 };
 
+const BATCH_SIZE = 50; // Process in batches to avoid payload size limits
+
 export default function CSVImportWizard({ open, onOpenChange, onImportComplete, profileCurrency }) {
   const [file, setFile] = useState(null);
   const [step, setStep] = useState(1);
@@ -48,6 +50,7 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
   const [importing, setImporting] = useState(false);
   const [results, setResults] = useState(null);
   const [importMode, setImportMode] = useState(null); // 'monzo' or 'generic'
+  const [importProgress, setImportProgress] = useState(0);
   const fileInputRef = useRef(null);
 
   const currentProfile = localStorage.getItem('currentProfile');
@@ -175,22 +178,17 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
   };
 
   const parseMonzoAmount = (row) => {
-    // Monzo has separate columns: Amount, Money Out, Money In
-    // Negative Amount = money out (expense)
-    // Positive Amount = money in (income)
-    // But also check Money Out and Money In columns
-    
     const amount = parseFloat(row['Amount'] || '0');
     const moneyOut = parseFloat(row['Money Out'] || '0');
     const moneyIn = parseFloat(row['Money In'] || '0');
     
     if (moneyOut > 0) {
-      return -moneyOut; // Expense
+      return -moneyOut;
     } else if (moneyIn > 0) {
-      return moneyIn; // Income
+      return moneyIn;
     }
     
-    return amount; // Use the main Amount column
+    return amount;
   };
 
   const detectMonzoTransactionType = (row) => {
@@ -205,7 +203,7 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
       return 'income';
     }
     
-    return 'expense'; // Default
+    return 'expense';
   };
 
   const mapMonzoCategory = (category) => {
@@ -225,6 +223,7 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
 
   const handleImport = async () => {
     setImporting(true);
+    setImportProgress(0);
     try {
       const expensesToCreate = [];
       
@@ -245,20 +244,17 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
         let category;
         
         if (importMode === 'monzo') {
-          // Monzo-specific processing
           amount = parseMonzoAmount(row);
           type = detectMonzoTransactionType(row);
           category = mapMonzoCategory(row['Category']);
           
-          // Skip zero amounts
           if (amount === 0) continue;
           
-          // Use description from Type + Name if title is empty
           const finalTitle = title || `${row['Type'] || ''} ${row['Name'] || ''}`.trim() || 'Unknown';
           
           expensesToCreate.push({
             title: finalTitle,
-            amount: Math.abs(amount), // Store as positive, type determines direction
+            amount: Math.abs(amount),
             type: type,
             category: category,
             date: parseMonzoDate(dateStr),
@@ -267,17 +263,14 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
             originalCurrency: 'GBP',
             notes: row['Notes and #tags'] || '',
             profile: currentProfile,
-            // Additional Monzo-specific fields
             merchant: row['Name'] || null,
             transactionId: row['Transaction ID'] || null
           });
         } else {
-          // Generic CSV processing
           const amountStr = row[columnMapping.amount];
           const { currency: detectedCurrency, cleanAmount } = detectCurrency(amountStr);
           amount = parseFloat(cleanAmount);
 
-          // Convert to profile currency if different
           if (detectedCurrency !== profileCurrency) {
             const rates = {
               'GBP-USD': 1.27,
@@ -293,7 +286,6 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
             }
           }
 
-          // Skip zero amounts
           if (!amount || isNaN(amount)) continue;
 
           expensesToCreate.push({
@@ -312,13 +304,28 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
       }
 
       if (expensesToCreate.length > 0) {
-        await base44.entities.Expense.bulkCreate(expensesToCreate);
+        let imported = 0;
+        let skipped = 0;
+        
+        // Process in batches
+        for (let i = 0; i < expensesToCreate.length; i += BATCH_SIZE) {
+          const batch = expensesToCreate.slice(i, i + BATCH_SIZE);
+          try {
+            await base44.entities.Expense.bulkCreate(batch);
+            imported += batch.length;
+          } catch (batchError) {
+            console.error('Batch import error:', batchError);
+            skipped += batch.length;
+          }
+          setImportProgress(Math.min(100, Math.round((i + BATCH_SIZE) / expensesToCreate.length * 100)));
+        }
+        
         setResults({
           success: true,
-          imported: expensesToCreate.length,
-          skipped: csvData.length - expensesToCreate.length
+          imported: imported,
+          skipped: skipped
         });
-        toast.success(`Imported ${expensesToCreate.length} transactions`);
+        toast.success(`Imported ${imported} transactions`);
         setStep(3);
         onImportComplete?.();
       } else {
@@ -350,6 +357,7 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
     });
     setResults(null);
     setImportMode(null);
+    setImportProgress(0);
   };
 
   const handleClose = () => {
@@ -378,7 +386,6 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
                   Select a CSV file with your transaction data
                 </p>
                 
-                {/* Hidden file input */}
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -387,7 +394,6 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
                   className="hidden"
                 />
                 
-                {/* Button triggers file input */}
                 <Button 
                   onClick={triggerFileInput}
                   className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white"
@@ -402,22 +408,12 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
                 <ul className="text-xs text-slate-400 space-y-1">
                   <li className="flex items-center gap-2">
                     <ChevronRight className="w-3 h-3 text-teal-400" />
-                    <span className="text-teal-400">Monzo CSV</span> - Automatically detected and optimized
+                    <span className="text-teal-400">Monzo CSV</span> - Automatically detected
                   </li>
                   <li className="flex items-center gap-2">
                     <ChevronRight className="w-3 h-3 text-slate-400" />
                     <span>Generic CSV</span> - Manual column mapping
                   </li>
-                </ul>
-              </div>
-
-              <div className="glass-card p-4 rounded-xl border border-white/5">
-                <p className="text-sm text-slate-300 mb-2 font-medium">CSV Format Requirements:</p>
-                <ul className="text-xs text-slate-400 space-y-1 list-disc list-inside">
-                  <li>Must include columns for: Title/Description, Amount, Date</li>
-                  <li>Date format: YYYY-MM-DD or DD/MM/YYYY (Monzo)</li>
-                  <li>Amount can include currency symbols (£, $, €) - will be auto-detected</li>
-                  <li>Optional: Category, Type (expense/income), Notes</li>
                 </ul>
               </div>
             </div>
@@ -443,13 +439,9 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
               </div>
 
               {importMode === 'monzo' ? (
-                // Monzo-specific preview
                 <div className="space-y-4">
                   <div className="glass-card p-4 rounded-xl border border-teal-500/20 bg-teal-500/5">
                     <p className="text-sm text-teal-400 font-medium mb-3">Monzo CSV Detected</p>
-                    <p className="text-xs text-slate-300">
-                      The following fields will be automatically mapped:
-                    </p>
                     <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                       <div className="flex justify-between">
                         <span className="text-slate-400">Date:</span>
@@ -467,14 +459,9 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
                         <span className="text-slate-400">Category:</span>
                         <span className="text-white">Category (mapped)</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">Notes:</span>
-                        <span className="text-white">Notes and #tags</span>
-                      </div>
                     </div>
                   </div>
 
-                  {/* Show sample data */}
                   <div className="glass-card p-3 rounded-xl border border-white/5">
                     <p className="text-xs text-slate-400 mb-2">Sample (first 3 rows):</p>
                     <div className="space-y-1 text-xs">
@@ -491,7 +478,6 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
                   </div>
                 </div>
               ) : (
-                // Generic column mapping
                 <div className="space-y-4">
                   <p className="text-sm text-slate-300 font-medium">Map CSV Columns:</p>
                   
@@ -552,42 +538,6 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
                         </SelectContent>
                       </Select>
                     </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-slate-300">Type (Optional)</Label>
-                      <Select value={columnMapping.type} onValueChange={(v) => setColumnMapping({ ...columnMapping, type: v })}>
-                        <SelectTrigger className="glass-card border-white/10 text-white">
-                          <SelectValue placeholder="Select column" />
-                        </SelectTrigger>
-                        <SelectContent className="glass-strong border-white/10">
-                          <SelectItem value={null} className="text-white">None</SelectItem>
-                          {headers.map(h => (
-                            <SelectItem key={h} value={h} className="text-white">{h}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-slate-300">Notes (Optional)</Label>
-                      <Select value={columnMapping.notes} onValueChange={(v) => setColumnMapping({ ...columnMapping, notes: v })}>
-                        <SelectTrigger className="glass-card border-white/10 text-white">
-                          <SelectValue placeholder="Select column" />
-                        </SelectTrigger>
-                        <SelectContent className="glass-strong border-white/10">
-                          <SelectItem value={null} className="text-white">None</SelectItem>
-                          {headers.map(h => (
-                            <SelectItem key={h} value={h} className="text-white">{h}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="glass-card p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
-                    <p className="text-sm text-amber-400">
-                      💡 Currency will be auto-detected from amount (£, $, €) and converted to {profileCurrency} if needed
-                    </p>
                   </div>
                 </div>
               )}
@@ -604,7 +554,7 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
                   {importing ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Importing...
+                      Importing... {importProgress > 0 && `(${importProgress}%)`}
                     </>
                   ) : (
                     <>
