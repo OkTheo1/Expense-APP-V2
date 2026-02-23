@@ -348,18 +348,28 @@ export default function Dashboard() {
     return txDate >= start && txDate <= end;
   });
 
-  // Calculate local totals
+  // Calculate local totals - this month
   const localSpent = thisMonthExpenses.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0);
   const localIncome = thisMonthExpenses.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0);
+  
+  // Calculate all-time local totals
+  const allTimeLocalSpent = expenses.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0);
+  const allTimeLocalIncome = expenses.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0);
   
   // Calculate bank totals (this month)
   const bankIncome = thisMonthBankTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
   const bankExpenses = thisMonthBankTransactions.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
-  // Combined totals
+  // Calculate all-time bank totals
+  const allTimeBankIncome = bankTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+  const allTimeBankExpenses = bankTransactions.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+  // Combined totals - this month (for spending block)
   const totalSpent = localSpent + bankExpenses;
   const totalIncome = localIncome + bankIncome;
-  const balance = totalIncome - totalSpent;
+  
+  // All-time balance (total income - total expenses)
+  const balance = (allTimeLocalIncome + allTimeBankIncome) - (allTimeLocalSpent + allTimeBankExpenses);
   const totalBudget = budgets.reduce((sum, b) => sum + b.limit, 0);
   
   // Calculate expected monthly income from recurring transactions
