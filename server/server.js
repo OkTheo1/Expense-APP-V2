@@ -278,6 +278,7 @@ async function getAllAccounts() {
 // Get all transactions from all connections
 async function getAllTransactions() {
   const allTransactions = [];
+  const now = new Date();
   
   for (const [id, connection] of bankConnections) {
     if (!connection.accessToken || !connection.accounts.length) {
@@ -287,34 +288,13 @@ async function getAllTransactions() {
     // Fetch transactions for each account
     for (const account of connection.accounts) {
       try {
-        // Calculate the from date - use account creation date or 10 years back
-        let fromDate;
-        const now = new Date();
-        
-        // Try to get account creation date from the account object
-        // TrueLayer may provide this in various formats
-        if (account.created_at) {
-          fromDate = new Date(account.created_at);
-        } else if (account.creation_date) {
-          fromDate = new Date(account.creation_date);
-        } else if (account.opening_date) {
-          fromDate = new Date(account.opening_date);
-        } else {
-          // Default to 10 years ago if no creation date available
-          fromDate = new Date(now.getFullYear() - 10, now.getMonth(), now.getDate());
-        }
-        
-        // Don't go future dates
-        if (fromDate > now) {
-          fromDate = now;
-        }
-        
-        // Calculate how far back we're fetching (for logging)
-        const daysBack = Math.floor((now - fromDate) / (1000 * 60 * 60 * 24));
-        console.log(`Fetching transactions for account ${account.account_id} from ${fromDate.toISOString().split('T')[0]} (${daysBack} days back)`);
-        
-        // Format date as YYYY-MM-DD
+        // TrueLayer has a maximum date range limit (typically 90 days)
+        // We'll use 90 days as that's the standard Open Banking limit
+        let fromDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000); // 90 days ago
         const fromDateStr = fromDate.toISOString().split('T')[0];
+        const toDateStr = now.toISOString().split('T')[0];
+        
+        console.log(`Fetching transactions for account ${account.display_name} from ${fromDateStr} to ${toDateStr}`);
         
         const response = await axios.get(
           `${TRUELAYER_API_URL}data/v1/accounts/${account.account_id}/transactions`,
@@ -324,7 +304,7 @@ async function getAllTransactions() {
             },
             params: {
               from: fromDateStr,
-              to: now.toISOString().split('T')[0]
+              to: toDateStr
             }
           }
         );
