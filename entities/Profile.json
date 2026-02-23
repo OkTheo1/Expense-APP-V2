@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "currency": {
+      "type": "string",
+      "default": "GBP",
+      "enum": [
+        "GBP",
+        "USD",
+        "EUR"
+      ]
+    },
+    "color": {
+      "type": "string",
+      "default": "#14b8a6"
+    },
+    "isDefault": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "name": "Profile"
+}

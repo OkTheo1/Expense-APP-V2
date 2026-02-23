@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "properties": {
+    "month": {
+      "type": "string",
+      "description": "Month in YYYY-MM format"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Housing",
+        "Food & Dining",
+        "Transportation",
+        "Entertainment",
+        "Shopping",
+        "Utilities",
+        "Healthcare",
+        "Education",
+        "Personal",
+        "Savings",
+        "Other"
+      ]
+    },
+    "limit": {
+      "type": "number",
+      "description": "Monthly spending limit for this category"
+    }
+  },
+  "required": [
+    "month",
+    "category",
+    "limit"
+  ],
+  "name": "Budget"
+}

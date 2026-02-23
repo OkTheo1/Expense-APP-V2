@@ -1,0 +1,92 @@
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Name of recurring transaction"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Amount"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "expense",
+        "income"
+      ],
+      "default": "expense"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Housing",
+        "Food & Dining",
+        "Transportation",
+        "Entertainment",
+        "Shopping",
+        "Utilities",
+        "Healthcare",
+        "Education",
+        "Personal",
+        "Savings",
+        "Other",
+        "Salary",
+        "Freelance",
+        "Investment"
+      ]
+    },
+    "frequency": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly",
+        "yearly"
+      ]
+    },
+    "startDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "endDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Optional end date"
+    },
+    "lastGenerated": {
+      "type": "string",
+      "format": "date",
+      "description": "Last date a transaction was generated"
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true
+    },
+    "currency": {
+      "type": "string",
+      "default": "GBP",
+      "enum": [
+        "GBP",
+        "USD",
+        "EUR"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    },
+    "profile": {
+      "type": "string",
+      "description": "Profile ID"
+    }
+  },
+  "required": [
+    "title",
+    "amount",
+    "category",
+    "frequency",
+    "startDate",
+    "type"
+  ],
+  "name": "RecurringTransaction"
+}

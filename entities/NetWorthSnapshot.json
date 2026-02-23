@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "properties": {
+    "month": {
+      "type": "string",
+      "description": "Month in YYYY-MM format"
+    },
+    "assets": {
+      "type": "number",
+      "description": "Total assets"
+    },
+    "liabilities": {
+      "type": "number",
+      "description": "Total liabilities"
+    },
+    "netWorth": {
+      "type": "number",
+      "description": "Net worth (assets - liabilities)"
+    },
+    "currency": {
+      "type": "string",
+      "default": "GBP",
+      "enum": [
+        "GBP",
+        "USD",
+        "EUR"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    },
+    "profile": {
+      "type": "string",
+      "description": "Profile ID"
+    }
+  },
+  "required": [
+    "month",
+    "assets",
+    "liabilities"
+  ],
+  "name": "NetWorthSnapshot"
+}

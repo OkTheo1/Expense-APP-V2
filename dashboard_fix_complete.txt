@@ -1,0 +1,1 @@
+Task completed: Dashboard now displays calculated values for balance, spending, and breakdown

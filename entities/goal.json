@@ -1,0 +1,54 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the savings goal"
+    },
+    "targetAmount": {
+      "type": "number",
+      "description": "Target amount to save"
+    },
+    "currentAmount": {
+      "type": "number",
+      "default": 0,
+      "description": "Current amount saved"
+    },
+    "targetDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Target completion date"
+    },
+    "color": {
+      "type": "string",
+      "default": "#14b8a6",
+      "description": "Color for visual identification"
+    },
+    "currency": {
+      "type": "string",
+      "default": "GBP",
+      "enum": [
+        "GBP",
+        "USD",
+        "EUR"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    },
+    "isCompleted": {
+      "type": "boolean",
+      "default": false
+    },
+    "profile": {
+      "type": "string",
+      "description": "Profile ID"
+    }
+  },
+  "required": [
+    "name",
+    "targetAmount",
+    "targetDate"
+  ],
+  "name": "Goal"
+}

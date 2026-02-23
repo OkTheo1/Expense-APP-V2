@@ -1,0 +1,44 @@
+{
+  "type": "object",
+  "properties": {
+    "blockType": {
+      "type": "string",
+      "enum": [
+        "balance",
+        "spending",
+        "budget",
+        "category-chart",
+        "trend-chart",
+        "recent-transactions",
+        "net-worth",
+        "goals"
+      ]
+    },
+    "position": {
+      "type": "number",
+      "description": "Order position"
+    },
+    "width": {
+      "type": "string",
+      "enum": [
+        "full",
+        "half",
+        "third"
+      ],
+      "default": "half"
+    },
+    "isVisible": {
+      "type": "boolean",
+      "default": true
+    },
+    "profile": {
+      "type": "string",
+      "description": "Profile ID"
+    }
+  },
+  "required": [
+    "blockType",
+    "position"
+  ],
+  "name": "DashboardBlock"
+}

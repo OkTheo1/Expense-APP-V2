@@ -1,0 +1,1 @@
+Task complete - http://localhost:5173/ is working. Changes made: 1) Added DEMO_MODE to AuthContext, 2) Added fallback blocks in Dashboard, 3) Removed demo data. DEMO_MODE kept.
