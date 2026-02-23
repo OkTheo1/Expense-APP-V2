@@ -109,11 +109,12 @@ app.get('/auth/truelayer', (req, res) => {
   // For simplicity, we'll use it in the state parameter
   const state = JSON.stringify({ connectionId });
 
+  // Include offline_access to get refresh token
   const authParams = new URLSearchParams({
     response_type: 'code',
     client_id: CLIENT_ID,
     redirect_uri: REDIRECT_URI,
-    scope: 'info accounts balance transactions',
+    scope: 'info accounts balance transactions offline_access',
     providers: 'uk-ob-all uk-oauth-all',
     state: state
   });
