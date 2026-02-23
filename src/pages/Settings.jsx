@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Palette, Database, Globe } from 'lucide-react';
+import { Palette, Database, Globe, Upload, FileSpreadsheet } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import CSVImportWizard from '@/components/CSVImportWizard';
 
 export default function Settings() {
+  const [csvImportOpen, setCsvImportOpen] = useState(false);
+
   return (
     <div className="min-h-screen p-8">
       <div className="max-w-6xl mx-auto">
@@ -33,7 +37,14 @@ export default function Settings() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-slate-400">Manage your data and backups</p>
+              <p className="text-slate-400 mb-4">Manage your data and backups</p>
+              <Button 
+                onClick={() => setCsvImportOpen(true)}
+                className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Import Transactions
+              </Button>
             </CardContent>
           </Card>
 
@@ -51,6 +62,12 @@ export default function Settings() {
           </Card>
         </div>
       </div>
+
+      <CSVImportWizard 
+        open={csvImportOpen} 
+        onOpenChange={setCsvImportOpen}
+        profileCurrency="GBP"
+      />
     </div>
   );
 }
