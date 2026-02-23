@@ -599,16 +599,6 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* Monzo Balance Display */}
-          {bankAccounts.length > 0 && (
-            <div className="mt-4 sm:mt-0">
-              <div className="glass-card px-6 py-3 rounded-xl border border-teal-500/30 bg-gradient-to-r from-teal-500/10 to-emerald-500/10">
-                <p className="text-xs text-slate-400 uppercase tracking-wide">Monzo Total Balance</p>
-                <p className="text-2xl font-semibold text-white">{formatAmount(balance)}</p>
-              </div>
-            </div>
-          )}
-          
           {/* Bank Controls */}
           <div className="flex items-center gap-3 mt-4 sm:mt-0">
             {bankAccounts.length > 0 && (
