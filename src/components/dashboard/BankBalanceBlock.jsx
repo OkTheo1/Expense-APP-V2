@@ -10,7 +10,7 @@ import {
   checkBankConnection
 } from '@/lib/bankData';
 
-export default function BankBalanceBlock({ currency = 'GBP' }) {
+export default function BankBalanceBlock({ currency = 'GBP', accounts: propAccounts = null, balance: propBalance = null }) {
   const [accounts, setAccounts] = useState([]);
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -18,8 +18,21 @@ export default function BankBalanceBlock({ currency = 'GBP' }) {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    loadBankData();
-  }, []);
+    // If accounts are passed via props, use them directly
+    if (propAccounts !== null) {
+      setAccounts(propAccounts);
+      setBalance(propBalance !== null ? propBalance : 0);
+      checkConnectionStatus();
+    } else {
+      loadBankData();
+    }
+  }, [propAccounts, propBalance]);
+
+  const checkConnectionStatus = async () => {
+    const status = await checkBankConnection();
+    setIsConnected(status.connected);
+    setLoading(false);
+  };
 
   const loadBankData = async () => {
     setLoading(true);

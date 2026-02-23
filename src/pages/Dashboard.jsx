@@ -26,7 +26,9 @@ import {
   getBankAccounts, 
   getBankTransactions, 
   getBankName, 
-  filterByBank 
+  filterByBank,
+  filterAccountsByBank,
+  getFilteredBankBalance
 } from '@/lib/bankData';
 
 export default function Dashboard() {
@@ -211,15 +213,26 @@ const pieData = Object.entries(spendingByCategory).map(([name, value]) => ({
     return filterByBank(bankTransactions, selectedBank, bankAccounts);
   }, [bankTransactions, selectedBank, bankAccounts]);
 
+  // Filter bank accounts by selected bank
+  const filteredBankAccounts = useMemo(() => {
+    return filterAccountsByBank(bankAccounts, selectedBank);
+  }, [bankAccounts, selectedBank]);
+
+  // Calculate filtered bank balance
+  const filteredBankBalance = useMemo(() => {
+    return getFilteredBankBalance(filteredBankAccounts);
+  }, [filteredBankAccounts]);
+
   // Get selected bank info for display
   const selectedBankInfo = useMemo(() => {
     if (!selectedBank || selectedBank === 'all') {
-      return { type: 'all', name: 'All Banks' };
+      return { type: 'all', name: 'All Banks', count: bankAccounts.length };
     }
     
     if (selectedBank.startsWith('bank:')) {
       const bankName = selectedBank.replace('bank:', '');
-      return { type: 'bank', name: bankName };
+      const count = bankAccounts.filter(a => getBankName(a) === bankName).length;
+      return { type: 'bank', name: bankName, count };
     }
     
     const account = bankAccounts.find(a => a.account_id === selectedBank);
@@ -227,11 +240,12 @@ const pieData = Object.entries(spendingByCategory).map(([name, value]) => ({
       return { 
         type: 'account', 
         name: account.display_name || getBankName(account),
-        bank: getBankName(account)
+        bank: getBankName(account),
+        count: 1
       };
     }
     
-    return { type: 'all', name: 'All Banks' };
+    return { type: 'all', name: 'All Banks', count: bankAccounts.length };
   }, [selectedBank, bankAccounts]);
 
   const handleBankChange = (value) => {
@@ -241,7 +255,7 @@ const pieData = Object.entries(spendingByCategory).map(([name, value]) => ({
   const renderBlock = (block) => {
     switch (block.blockType) {
       case 'bank-balance':
-        return <BankBalanceBlock currency={currency} />;
+        return <BankBalanceBlock currency={currency} accounts={filteredBankAccounts} balance={filteredBankBalance} />;
       case 'balance':
         return <BalanceBlock balance={balance} currency={currency} change={change} thisMonth={totalSpent} lastMonth={lastMonthSpent} />;
       case 'spending':
@@ -251,7 +265,7 @@ const pieData = Object.entries(spendingByCategory).map(([name, value]) => ({
       case 'recent-transactions':
         return <RecentTransactionsBlock transactions={thisMonthExpenses} currency={currency} />;
       case 'bank-transactions':
-        return <BankTransactionsBlock currency={currency} limit={10} />;
+        return <BankTransactionsBlock currency={currency} limit={10} transactions={filteredBankTransactions} />;
       case 'projected-expenses':
         return (
           <ProjectedExpensesBlock 
@@ -291,13 +305,6 @@ const pieData = Object.entries(spendingByCategory).map(([name, value]) => ({
           {/* Bank Selector */}
           {bankAccounts.length > 0 && (
             <div className="flex items-center gap-3 mt-4 sm:mt-0">
-              <div className="flex items-center gap-2 text-sm">
-                <Building2 className="h-4 w-4 text-teal-400" />
-                <span className="text-slate-400">Viewing:</span>
-                <span className="text-white font-medium">
-                  {selectedBankInfo.type === 'all' ? 'All Banks' : selectedBankInfo.name}
-                </span>
-              </div>
               <BankSelector 
                 value={selectedBank} 
                 onChange={handleBankChange}

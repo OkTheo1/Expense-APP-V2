@@ -363,3 +363,24 @@ export const filterByBank = (transactions, selectedValue, accounts) => {
     tx.accountId && accountIdsToInclude.has(tx.accountId)
   );
 };
+
+// Filter accounts by selected bank/account
+export const filterAccountsByBank = (accounts, selectedValue) => {
+  if (!selectedValue || selectedValue === 'all') {
+    return accounts;
+  }
+
+  if (selectedValue.startsWith('bank:')) {
+    const bankName = selectedValue.replace('bank:', '');
+    return accounts.filter(account => getBankName(account) === bankName);
+  } else {
+    return accounts.filter(account => account.account_id === selectedValue);
+  }
+};
+
+// Get total balance from filtered accounts
+export const getFilteredBankBalance = (accounts) => {
+  return accounts.reduce((total, account) => {
+    return total + (account.balance?.available || account.balance?.current || 0);
+  }, 0);
+};

@@ -17,14 +17,14 @@ const CATEGORY_ICONS = {
   'Uncategorized': '❓'
 };
 
-export default function BankTransactionsBlock({ currency = 'GBP', limit = 10 }) {
+export default function BankTransactionsBlock({ currency = 'GBP', limit = 10, transactions: propTransactions = null }) {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     loadTransactions();
-  }, []);
+  }, [propTransactions]);
 
   const loadTransactions = async () => {
     setLoading(true);
@@ -34,7 +34,13 @@ export default function BankTransactionsBlock({ currency = 'GBP', limit = 10 }) 
     setIsConnected(status.connected);
     
     if (status.connected) {
-      const localTransactions = getBankTransactions();
+      // Use provided transactions from props if available, otherwise fetch locally
+      let localTransactions;
+      if (propTransactions && propTransactions.length > 0) {
+        localTransactions = propTransactions;
+      } else {
+        localTransactions = getBankTransactions();
+      }
       // Sort by date descending
       const sorted = localTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
       setTransactions(sorted.slice(0, limit));
