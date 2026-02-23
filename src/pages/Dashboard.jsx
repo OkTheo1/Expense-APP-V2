@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Plus, Settings } from 'lucide-react';
+import { Plus, Settings, Building2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import DraggableBlock from '@/components/dashboard/DraggabbleBlock';
 import BalanceBlock from '@/components/dashboard/BalanceBlock';
@@ -12,6 +12,7 @@ import RecentTransactionsBlock from '@/components/dashboard/RecentTransactionsBl
 import ProjectedExpensesBlock from '@/components/dashboard/ProjectedExpensesBlock';
 import BankBalanceBlock from '@/components/dashboard/BankBalanceBlock';
 import BankTransactionsBlock from '@/components/dashboard/BankTransactionsBlock';
+import BankSelector from '@/components/BankSelector';
 import { toast } from 'sonner';
 import { 
   getExpenses, 
@@ -21,6 +22,12 @@ import {
   saveDashboardBlocks,
   getRecurringTransactions 
 } from '@/lib/localDatabase';
+import { 
+  getBankAccounts, 
+  getBankTransactions, 
+  getBankName, 
+  filterByBank 
+} from '@/lib/bankData';
 
 export default function Dashboard() {
   const [expenses, setExpenses] = useState([]);
@@ -31,6 +38,9 @@ export default function Dashboard() {
   const [draggedBlock, setDraggedBlock] = useState(null);
   const [currency, setCurrency] = useState('GBP');
   const [editMode, setEditMode] = useState(false);
+  const [selectedBank, setSelectedBank] = useState('all');
+  const [bankAccounts, setBankAccounts] = useState([]);
+  const [bankTransactions, setBankTransactions] = useState([]);
 
   const currentProfile = localStorage.getItem('currentProfile');
 
@@ -38,7 +48,19 @@ export default function Dashboard() {
     loadData();
     loadBlocks();
     loadProfileCurrency();
+    loadBankData();
   }, []);
+
+  const loadBankData = () => {
+    try {
+      const accounts = getBankAccounts();
+      const transactions = getBankTransactions();
+      setBankAccounts(accounts);
+      setBankTransactions(transactions);
+    } catch (error) {
+      console.error('Error loading bank data:', error);
+    }
+  };
 
   const loadProfileCurrency = () => {
     try {
@@ -175,10 +197,46 @@ export default function Dashboard() {
       return acc;
     }, {});
 
-  const pieData = Object.entries(spendingByCategory).map(([name, value]) => ({
+const pieData = Object.entries(spendingByCategory).map(([name, value]) => ({
     name,
     value
   }));
+
+  // Filter bank transactions by selected bank
+  const filteredBankTransactions = useMemo(() => {
+    if (!selectedBank || selectedBank === 'all') {
+      return bankTransactions;
+    }
+    
+    return filterByBank(bankTransactions, selectedBank, bankAccounts);
+  }, [bankTransactions, selectedBank, bankAccounts]);
+
+  // Get selected bank info for display
+  const selectedBankInfo = useMemo(() => {
+    if (!selectedBank || selectedBank === 'all') {
+      return { type: 'all', name: 'All Banks' };
+    }
+    
+    if (selectedBank.startsWith('bank:')) {
+      const bankName = selectedBank.replace('bank:', '');
+      return { type: 'bank', name: bankName };
+    }
+    
+    const account = bankAccounts.find(a => a.account_id === selectedBank);
+    if (account) {
+      return { 
+        type: 'account', 
+        name: account.display_name || getBankName(account),
+        bank: getBankName(account)
+      };
+    }
+    
+    return { type: 'all', name: 'All Banks' };
+  }, [selectedBank, bankAccounts]);
+
+  const handleBankChange = (value) => {
+    setSelectedBank(value);
+  };
 
   const renderBlock = (block) => {
     switch (block.blockType) {
@@ -219,7 +277,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen p-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+{/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
             <h1 className="text-4xl font-light text-white tracking-tight">
@@ -229,7 +287,26 @@ export default function Dashboard() {
               {format(new Date(), 'EEEE, MMMM d, yyyy')}
             </p>
           </div>
-          <div className="flex items-center gap-3 mt-4 sm:mt-0">
+          
+          {/* Bank Selector */}
+          {bankAccounts.length > 0 && (
+            <div className="flex items-center gap-3 mt-4 sm:mt-0">
+              <div className="flex items-center gap-2 text-sm">
+                <Building2 className="h-4 w-4 text-teal-400" />
+                <span className="text-slate-400">Viewing:</span>
+                <span className="text-white font-medium">
+                  {selectedBankInfo.type === 'all' ? 'All Banks' : selectedBankInfo.name}
+                </span>
+              </div>
+              <BankSelector 
+                value={selectedBank} 
+                onChange={handleBankChange}
+                showAllOption={true}
+              />
+            </div>
+          )}
+          
+          <div className="flex items-center gap-3 mt-4 sm:mt-0 ml-auto">
             <Button 
               variant={editMode ? "default" : "outline"}
               onClick={() => setEditMode(!editMode)}

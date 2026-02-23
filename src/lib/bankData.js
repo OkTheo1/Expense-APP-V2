@@ -339,3 +339,27 @@ export const getAccountCustomName = (accountId) => {
   const mappings = getFromStorage(STORAGE_KEYS.BANK_ACCOUNT_MAPPINGS, {});
   return mappings[accountId] || null;
 };
+
+// Filter transactions by selected bank/account
+export const filterByBank = (transactions, selectedValue, accounts) => {
+  if (!selectedValue || selectedValue === 'all') {
+    return transactions;
+  }
+
+  const accountIdsToInclude = new Set();
+
+  if (selectedValue.startsWith('bank:')) {
+    const bankName = selectedValue.replace('bank:', '');
+    accounts.forEach(account => {
+      if (getBankName(account) === bankName) {
+        accountIdsToInclude.add(account.account_id);
+      }
+    });
+  } else {
+    accountIdsToInclude.add(selectedValue);
+  }
+
+  return transactions.filter(tx => 
+    tx.accountId && accountIdsToInclude.has(tx.accountId)
+  );
+};
