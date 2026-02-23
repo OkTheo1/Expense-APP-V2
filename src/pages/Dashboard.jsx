@@ -335,40 +335,107 @@ export default function Dashboard() {
   const monthStart = startOfMonth(new Date()).toISOString().split('T')[0];
   const monthEnd = endOfMonth(new Date()).toISOString().split('T')[0];
 
+  // This month's local expenses
   const thisMonthExpenses = expenses.filter(e => 
     e.date >= monthStart && e.date <= monthEnd
   );
 
-  const totalSpent = thisMonthExpenses.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0);
-  const totalIncome = thisMonthExpenses.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0);
+  // This month's bank transactions
+  const thisMonthBankTransactions = filteredBankTransactions.filter(tx => {
+    const txDate = new Date(tx.date);
+    const start = new Date(monthStart);
+    const end = new Date(monthEnd);
+    return txDate >= start && txDate <= end;
+  });
+
+  // Calculate local totals
+  const localSpent = thisMonthExpenses.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0);
+  const localIncome = thisMonthExpenses.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0);
+  
+  // Calculate bank totals (this month)
+  const bankIncome = thisMonthBankTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+  const bankExpenses = thisMonthBankTransactions.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+  // Combined totals
+  const totalSpent = localSpent + bankExpenses;
+  const totalIncome = localIncome + bankIncome;
+  const balance = totalIncome - totalSpent;
   const totalBudget = budgets.reduce((sum, b) => sum + b.limit, 0);
   
   // Calculate expected monthly income from recurring transactions
   const monthlyRecurringIncome = recurringTransactions
     .filter(r => r.type === 'income')
     .reduce((sum, r) => sum + r.amount, 0);
-  
-  const balance = totalIncome - totalSpent;
 
   const lastMonthStart = startOfMonth(subMonths(new Date(), 1)).toISOString().split('T')[0];
   const lastMonthEnd = endOfMonth(subMonths(new Date(), 1)).toISOString().split('T')[0];
-  const lastMonthSpent = expenses
+  
+  // Last month's local expenses
+  const lastMonthSpentLocal = expenses
     .filter(e => e.date >= lastMonthStart && e.date <= lastMonthEnd && e.type === 'expense')
     .reduce((sum, e) => sum + e.amount, 0);
   
+  // Last month's bank transactions
+  const lastMonthBankTransactions = filteredBankTransactions.filter(tx => {
+    const txDate = new Date(tx.date);
+    const start = new Date(lastMonthStart);
+    const end = new Date(lastMonthEnd);
+    return txDate >= start && txDate <= end;
+  });
+  
+  const lastMonthBankExpenses = lastMonthBankTransactions
+    .filter(t => t.amount < 0)
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  
+  const lastMonthSpent = lastMonthSpentLocal + lastMonthBankExpenses;
+  
   const change = lastMonthSpent > 0 ? ((totalSpent - lastMonthSpent) / lastMonthSpent) * 100 : 0;
 
+  // Combined spending by category (local + bank)
   const spendingByCategory = thisMonthExpenses
     .filter(e => e.type === 'expense')
     .reduce((acc, expense) => {
       acc[expense.category] = (acc[expense.category] || 0) + expense.amount;
       return acc;
     }, {});
+  
+  // Add bank transaction categories
+  thisMonthBankTransactions
+    .filter(t => t.amount < 0)
+    .forEach(tx => {
+      const cat = tx.category || 'Uncategorized';
+      spendingByCategory[cat] = (spendingByCategory[cat] || 0) + Math.abs(tx.amount);
+    });
 
   const pieData = Object.entries(spendingByCategory).map(([name, value]) => ({
     name,
     value
   }));
+
+  // Combined transactions for recent activity
+  const combinedTransactions = useMemo(() => {
+    const localTxs = thisMonthExpenses.map(e => ({
+      id: `local-${e.id}`,
+      date: e.date,
+      description: e.description || 'Local Expense',
+      amount: e.type === 'income' ? e.amount : -e.amount,
+      category: e.category,
+      source: 'local'
+    }));
+    
+    const bankTxs = thisMonthBankTransactions.map((tx, idx) => ({
+      id: `bank-${idx}`,
+      date: tx.date,
+      description: tx.merchant || tx.description || 'Bank Transaction',
+      amount: tx.amount,
+      category: tx.category,
+      source: 'bank'
+    }));
+    
+    return [...localTxs, ...bankTxs]
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 20);
+  }, [thisMonthExpenses, thisMonthBankTransactions]);
 
   // Filter bank transactions by selected bank
   const filteredByBankTransactions = useMemo(() => {
@@ -429,7 +496,7 @@ export default function Dashboard() {
       case 'category-chart':
         return <CategoryChartBlock data={pieData} currency={currency} />;
       case 'recent-transactions':
-        return <RecentTransactionsBlock transactions={thisMonthExpenses} currency={currency} />;
+        return <RecentTransactionsBlock transactions={combinedTransactions} currency={currency} />;
       case 'bank-transactions':
         return <BankTransactionsBlock currency={currency} limit={10} transactions={filteredByBankTransactions} />;
       case 'projected-expenses':
