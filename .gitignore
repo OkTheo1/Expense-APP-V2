@@ -30,3 +30,6 @@ yarn-error.log*
 # OS files
 .DS_Store
 Thumbs.db
+
+# Server data files (contains sensitive tokens)
+server/bankConnections.json

@@ -348,28 +348,20 @@ export default function Dashboard() {
     return txDate >= start && txDate <= end;
   });
 
-  // Calculate local totals - this month
-  const localSpent = thisMonthExpenses.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0);
-  const localIncome = thisMonthExpenses.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0);
-  
-  // Calculate all-time local totals
-  const allTimeLocalSpent = expenses.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0);
-  const allTimeLocalIncome = expenses.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0);
-  
-  // Calculate bank totals (this month)
+  // Calculate bank totals (this month) - only use bank transactions
   const bankIncome = thisMonthBankTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
   const bankExpenses = thisMonthBankTransactions.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
-  // Calculate all-time bank totals
+  // Calculate all-time bank totals only
   const allTimeBankIncome = bankTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
   const allTimeBankExpenses = bankTransactions.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
   // Combined totals - this month (for spending block)
-  const totalSpent = localSpent + bankExpenses;
-  const totalIncome = localIncome + bankIncome;
+  const totalSpent = bankExpenses;
+  const totalIncome = bankIncome;
   
-  // All-time balance (total income - total expenses)
-  const balance = (allTimeLocalIncome + allTimeBankIncome) - (allTimeLocalSpent + allTimeBankExpenses);
+  // All-time balance (total income - total expenses) - bank only
+  const balance = allTimeBankIncome - allTimeBankExpenses;
   const totalBudget = budgets.reduce((sum, b) => sum + b.limit, 0);
   
   // Calculate expected monthly income from recurring transactions
@@ -726,12 +718,6 @@ export default function Dashboard() {
             <Settings className="w-4 h-4 mr-2" />
             {editMode ? 'Done Editing' : 'Edit Layout'}
           </Button>
-          <Link to={createPageUrl('AddExpense')}>
-            <Button className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white shadow-lg shadow-teal-500/30 rounded-xl px-6">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Transaction
-            </Button>
-          </Link>
         </div>
 
         {/* Helpful Tip */}

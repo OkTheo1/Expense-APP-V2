@@ -182,10 +182,12 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
     const moneyOut = parseFloat(row['Money Out'] || '0');
     const moneyIn = parseFloat(row['Money In'] || '0');
     
-    if (moneyOut > 0) {
-      return -moneyOut;
-    } else if (moneyIn > 0) {
-      return moneyIn;
+    // Money Out contains negative values for expenses (e.g., -5.98)
+    // Money In contains positive values for income (e.g., 5.00)
+    if (moneyOut !== 0) {
+      return moneyOut; // Already negative for expenses
+    } else if (moneyIn !== 0) {
+      return moneyIn; // Positive for income
     }
     
     return amount;
@@ -197,9 +199,11 @@ export default function CSVImportWizard({ open, onOpenChange, onImportComplete, 
     const moneyIn = parseFloat(row['Money In'] || '0');
     const type = row['Type'] || '';
     
-    if (moneyOut > 0 || amount < 0 || type.toLowerCase().includes('payment')) {
+    // Money Out contains negative values for expenses (e.g., -5.98)
+    // Money In contains positive values for income (e.g., 5.00)
+    if (moneyOut !== 0 || amount < 0 || type.toLowerCase().includes('payment')) {
       return 'expense';
-    } else if (moneyIn > 0 || amount > 0 || type.toLowerCase().includes('income') || type.toLowerCase().includes('transfer in')) {
+    } else if (moneyIn !== 0 || amount > 0 || type.toLowerCase().includes('income') || type.toLowerCase().includes('transfer in')) {
       return 'income';
     }
     

@@ -79,6 +79,12 @@ export const deleteExpense = (id) => {
   return true;
 };
 
+// Clear all expenses
+export const clearAllExpenses = () => {
+  saveToStorage(STORAGE_KEYS.EXPENSES, []);
+  return true;
+};
+
 // ============ BUDGETS ============
 export const getBudgets = () => {
   return getFromStorage(STORAGE_KEYS.BUDGETS, []);
@@ -288,18 +294,8 @@ export const clearAllData = () => {
 
 // Initialize with sample data if empty
 export const initializeSampleData = () => {
-  const expenses = getExpenses();
-  if (expenses.length === 0) {
-    const sampleExpenses = [
-      { id: generateId(), title: 'Grocery Shopping', amount: 85.50, type: 'expense', category: 'Food & Dining', date: '2024-01-15', currency: 'GBP', notes: 'Weekly groceries', createdAt: new Date().toISOString() },
-      { id: generateId(), title: 'Monthly Rent', amount: 1200, type: 'expense', category: 'Housing', date: '2024-01-01', currency: 'GBP', notes: 'January rent', createdAt: new Date().toISOString() },
-      { id: generateId(), title: 'Electric Bill', amount: 120, type: 'expense', category: 'Utilities', date: '2024-01-10', currency: 'GBP', notes: 'Electricity', createdAt: new Date().toISOString() },
-      { id: generateId(), title: 'Salary', amount: 3500, type: 'income', category: 'Salary', date: '2024-01-05', currency: 'GBP', notes: 'January salary', createdAt: new Date().toISOString() },
-      { id: generateId(), title: 'Gas Bill', amount: 65, type: 'expense', category: 'Utilities', date: '2024-01-12', currency: 'GBP', notes: 'Gas bill', createdAt: new Date().toISOString() },
-    ];
-    saveToStorage(STORAGE_KEYS.EXPENSES, sampleExpenses);
-  }
-
+  // Don't create sample expenses - rely on bank integration only
+  
   const profile = getProfile();
   if (!profile) {
     saveProfile({

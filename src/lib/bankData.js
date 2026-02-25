@@ -411,3 +411,45 @@ export const getFilteredBankBalance = (accounts) => {
     return total + available + overdraft;
   }, 0);
 };
+
+// Remove a specific bank (all accounts from that bank)
+export const removeBank = async (bankName) => {
+  try {
+    // Get current accounts from storage
+    const currentAccounts = getBankAccounts();
+    
+    // Filter out accounts from the specified bank
+    const remainingAccounts = currentAccounts.filter(account => {
+      const accountBankName = getBankName(account);
+      return accountBankName !== bankName;
+    });
+    
+    // Save the filtered accounts back to storage
+    saveToStorage(STORAGE_KEYS.BANK_ACCOUNTS, remainingAccounts);
+    
+    // Also remove transactions for accounts that were removed
+    const currentTransactions = getBankTransactions();
+    const removedAccountIds = currentAccounts
+      .filter(account => getBankName(account) === bankName)
+      .map(account => account.account_id);
+    
+    const remainingTransactions = currentTransactions.filter(tx => 
+      !removedAccountIds.includes(tx.accountId)
+    );
+    
+    saveToStorage(STORAGE_KEYS.BANK_TRANSACTIONS, remainingTransactions);
+    
+    // Also clean up any account name mappings for removed accounts
+    const mappings = getFromStorage(STORAGE_KEYS.BANK_ACCOUNT_MAPPINGS, {});
+    const newMappings = { ...mappings };
+    removedAccountIds.forEach(accountId => {
+      delete newMappings[accountId];
+    });
+    saveToStorage(STORAGE_KEYS.BANK_ACCOUNT_MAPPINGS, newMappings);
+    
+    return true;
+  } catch (error) {
+    console.error('Error removing bank:', error);
+    return false;
+  }
+};

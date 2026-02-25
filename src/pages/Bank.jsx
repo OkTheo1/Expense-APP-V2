@@ -6,6 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Building2, RefreshCw, Loader2, Plus, Trash2, Edit2, Save, X } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   getBankAccounts, 
   getBankTransactions, 
@@ -19,7 +29,8 @@ import {
   groupAccountsByBank,
   saveAccountNameMapping,
   getAccountCustomName,
-  refreshBankConnection
+  refreshBankConnection,
+  removeBank
 } from '@/lib/bankData';
 
 const API_BASE = 'http://localhost:3001';
@@ -30,6 +41,7 @@ export default function Bank() {
   const [isLoading, setIsLoading] = useState(false);
   const [editingAccountId, setEditingAccountId] = useState(null);
   const [editCustomName, setEditCustomName] = useState('');
+  const [bankToRemove, setBankToRemove] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -113,6 +125,32 @@ export default function Bank() {
   const handleCancelEdit = () => {
     setEditingAccountId(null);
     setEditCustomName('');
+  };
+
+  const handleRemoveBank = async () => {
+    if (!bankToRemove) return;
+    
+    try {
+      const success = await removeBank(bankToRemove);
+      if (success) {
+        toast.success(`${bankToRemove} removed successfully`);
+        // Reload accounts from storage
+        const updatedAccounts = getBankAccounts();
+        setAccounts(updatedAccounts);
+        
+        // If no more accounts, show connect screen
+        if (updatedAccounts.length === 0) {
+          setIsConnected(false);
+        }
+      } else {
+        toast.error('Failed to remove bank');
+      }
+    } catch (error) {
+      console.error('Error removing bank:', error);
+      toast.error('Failed to remove bank');
+    } finally {
+      setBankToRemove(null);
+    }
   };
 
   // Group accounts by bank
@@ -227,9 +265,20 @@ export default function Bank() {
           {banks.map(bankName => (
             <Card key={bankName} className="bg-slate-900/50 border-slate-800">
               <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-white">
-                  <Building2 className="h-5 w-5 text-teal-400" />
-                  {bankName}
+                <CardTitle className="flex items-center justify-between text-white">
+                  <div className="flex items-center gap-3">
+                    <Building2 className="h-5 w-5 text-teal-400" />
+                    {bankName}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setBankToRemove(bankName)}
+                    className="text-slate-400 hover:text-red-400 hover:bg-red-400/10"
+                    title="Remove bank"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -315,6 +364,30 @@ export default function Bank() {
           </Card>
         </div>
       </div>
+
+      {/* Remove Bank Confirmation Dialog */}
+      <AlertDialog open={!!bankToRemove} onOpenChange={() => setBankToRemove(null)}>
+        <AlertDialogContent className="bg-slate-900 border-slate-800">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Remove Bank</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-400">
+              Are you sure you want to remove {bankToRemove}? This will remove all accounts from this bank. 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-slate-800 text-white hover:bg-slate-700">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleRemoveBank}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Remove Bank
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
