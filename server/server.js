@@ -262,51 +262,64 @@ app.get('/auth/truelayer/callback', async (req, res) => {
 async function fetchAccountBalance(connection, accountId) {
   try {
     // Try the standard balances endpoint
+    console.log(`Fetching balance from /accounts/${accountId}/balances...`);
     const response = await axios.get(`${TRUELAYER_API_URL}data/v1/accounts/${accountId}/balances`, {
       headers: {
         'Authorization': `Bearer ${connection.accessToken}`
       }
     });
 
+    console.log(`Balance response status: ${response.status}`, JSON.stringify(response.data, null, 2));
+
     // TrueLayer returns balance data in results array
     // Take the first balance record (most recent)
     if (response.data.results && response.data.results.length > 0) {
       const balance = response.data.results[0];
+      console.log(`Balance found for account ${accountId}:`, JSON.stringify(balance, null, 2));
       return {
-        available: balance.available?.amount || 0,
-        current: balance.current?.amount || 0,
-        overdraft: balance.overlay?.overdraft?.amount || 0,
+        available: balance.available?.amount ?? balance.available ?? 0,
+        current: balance.current?.amount ?? balance.current ?? 0,
+        overdraft: balance.overlay?.overdraft?.amount ?? 0,
         currency: balance.available?.currency || balance.current?.currency || 'GBP'
       };
     }
+    console.log(`No balance results for account ${accountId}, response:`, response.data);
     return null;
   } catch (error) {
+    // Log detailed error
+    console.log(`Primary balance endpoint failed for ${accountId}:`, error.response?.status, error.response?.data || error.message);
+    
     // If standard endpoint fails, try alternative endpoints
     console.log(`Trying alternative balance endpoints for account ${accountId}...`);
     
     try {
-      // Try with /balance endpoint
+      // Try with /balance endpoint (singular)
+      console.log(`Fetching balance from /accounts/${accountId}/balance...`);
       const altResponse = await axios.get(`${TRUELAYER_API_URL}data/v1/accounts/${accountId}/balance`, {
         headers: {
           'Authorization': `Bearer ${connection.accessToken}`
         }
       });
       
-      if (altResponse.data) {
-        const balance = altResponse.data;
+      console.log(`Alt balance response status: ${altResponse.status}`, JSON.stringify(altResponse.data, null, 2));
+      
+      // Check for results array (TrueLayer returns balance in results[0])
+      if (altResponse.data.results && altResponse.data.results.length > 0) {
+        const balance = altResponse.data.results[0];
+        console.log(`Alt balance parsed for ${accountId}:`, JSON.stringify(balance, null, 2));
         return {
-          available: balance.available?.amount || balance.available || 0,
-          current: balance.current?.amount || balance.current || 0,
-          overdraft: balance.overlay?.overdraft?.amount || 0,
-          currency: balance.available?.currency || balance.current?.currency || 'GBP'
+          available: balance.available ?? 0,
+          current: balance.current ?? 0,
+          overdraft: balance.overdraft ?? 0,
+          currency: balance.currency || 'GBP'
         };
       }
     } catch (altError) {
-      console.log(`Alternative balance endpoint also failed for ${accountId}`);
+      console.log(`Alternative balance endpoint also failed for ${accountId}:`, altError.response?.status, altError.response?.data || altError.message);
     }
     
     // Return a default balance object so accounts still show
-    console.log(`Could not fetch balance for account ${accountId}, using default`);
+    console.log(`Could not fetch balance for account ${accountId}, using default 0`);
     return {
       available: 0,
       current: 0,
