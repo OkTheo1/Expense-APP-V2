@@ -243,11 +243,27 @@ export const fetchBankTransactions = async () => {
     
     if (data.transactions) {
       const rules = getCategoryRules();
-      const categorizedTransactions = data.transactions.map(tx => ({
-        ...tx,
-        category: categorizeTransaction(tx.description || tx.merchant || '', rules),
-        importedAt: new Date().toISOString()
-      }));
+      // Preserve manual category overrides from existing stored transactions
+      const existingTransactions = getBankTransactions();
+      const existingMap = new Map(existingTransactions.map(tx => [tx.id, tx]));
+
+      const categorizedTransactions = data.transactions.map(tx => {
+        const existing = existingMap.get(tx.id);
+        // If user manually set a category, keep it
+        if (existing && existing.categoryOverride) {
+          return {
+            ...tx,
+            category: existing.category,
+            categoryOverride: true,
+            importedAt: existing.importedAt || new Date().toISOString()
+          };
+        }
+        return {
+          ...tx,
+          category: categorizeTransaction(tx.description || tx.merchant || '', rules),
+          importedAt: new Date().toISOString()
+        };
+      });
       
       saveToStorage(STORAGE_KEYS.BANK_TRANSACTIONS, categorizedTransactions);
       return categorizedTransactions;
