@@ -1,16 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ArrowLeft, Search, Download, Building2, Plus, Loader2, ChevronDown, Calendar as CalendarIcon, X, TrendingUp, TrendingDown } from 'lucide-react';
+import { ArrowLeft, Download, Building2, Plus, Loader2, ChevronDown, Calendar as CalendarIcon, X, TrendingUp, TrendingDown } from 'lucide-react';
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek } from 'date-fns';
 import { toast } from 'sonner';
 import { 
@@ -116,12 +110,10 @@ export default function CalendarPage() {
   const filteredTransactions = useMemo(() => {
     let filtered = [...transactions];
 
-    // Filter by account
     if (accountFilter !== 'all') {
       filtered = filtered.filter(tx => tx.accountId === accountFilter);
     }
 
-    // Filter by category
     if (categoryFilter !== 'all') {
       filtered = filtered.filter(tx => (tx.category || 'Uncategorized') === categoryFilter);
     }
@@ -129,7 +121,6 @@ export default function CalendarPage() {
     return filtered;
   }, [transactions, accountFilter, categoryFilter]);
 
-  // Group transactions by date
   const transactionsByDate = useMemo(() => {
     const grouped = {};
     filteredTransactions.forEach(tx => {
@@ -147,14 +138,12 @@ export default function CalendarPage() {
     return grouped;
   }, [filteredTransactions]);
 
-  // Get transactions for selected date
   const selectedDateTransactions = useMemo(() => {
     if (!selectedDate) return [];
     const dateStr = format(selectedDate, 'yyyy-MM-dd');
     return transactionsByDate[dateStr]?.transactions || [];
   }, [selectedDate, transactionsByDate]);
 
-  // Get daily totals for calendar
   const dailyTotals = useMemo(() => {
     const totals = {};
     filteredTransactions.forEach(tx => {
@@ -172,7 +161,6 @@ export default function CalendarPage() {
     return totals;
   }, [filteredTransactions]);
 
-  // Calculate month totals
   const monthStats = useMemo(() => {
     const start = startOfMonth(currentMonth);
     const end = endOfMonth(currentMonth);
@@ -213,7 +201,6 @@ export default function CalendarPage() {
     }).format(amount);
   };
 
-  // Custom calendar day renderer
   const renderDay = (date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
     const dayData = dailyTotals[dateStr];
@@ -255,7 +242,6 @@ export default function CalendarPage() {
           </div>
         )}
         
-        {/* Transaction indicator dots */}
         {dayData && dayData.income > 0 && dayData.expenses > 0 && (
           <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
             <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
@@ -266,14 +252,12 @@ export default function CalendarPage() {
     );
   };
 
-  // Generate calendar days
   const calendarDays = useMemo(() => {
     const start = startOfWeek(startOfMonth(currentMonth));
     const end = endOfWeek(endOfMonth(currentMonth));
     return eachDayOfInterval({ start, end });
   }, [currentMonth]);
 
-  // Week days header
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   if (loading) {
@@ -349,7 +333,6 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        {/* Month Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           <Card className="bg-slate-900/50 border-slate-800">
             <CardContent className="p-4">
@@ -397,7 +380,6 @@ export default function CalendarPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Calendar Section */}
           <div className="lg:col-span-2">
             <Card className="bg-slate-900/50 border-slate-800">
               <CardHeader className="pb-2">
@@ -431,7 +413,6 @@ export default function CalendarPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                {/* Filters */}
                 <div className="flex flex-wrap gap-2 mb-4">
                   <Select value={accountFilter} onValueChange={setAccountFilter}>
                     <SelectTrigger className="w-full sm:w-40 bg-slate-800 border-slate-700">
@@ -462,9 +443,7 @@ export default function CalendarPage() {
                   </Select>
                 </div>
 
-                {/* Calendar Grid */}
                 <div className="grid grid-cols-7 gap-0 border border-slate-800 rounded-lg overflow-hidden">
-                  {/* Week days header */}
                   {weekDays.map(day => (
                     <div 
                       key={day} 
@@ -474,11 +453,9 @@ export default function CalendarPage() {
                     </div>
                   ))}
                   
-                  {/* Calendar days */}
                   {calendarDays.map(date => renderDay(date))}
                 </div>
 
-                {/* Legend */}
                 <div className="flex items-center gap-4 mt-4 text-xs text-slate-400">
                   <div className="flex items-center gap-1">
                     <div className="w-2 h-2 rounded-full bg-green-500" />
@@ -493,7 +470,6 @@ export default function CalendarPage() {
             </Card>
           </div>
 
-          {/* Selected Day Details */}
           <div className="lg:col-span-1">
             <Card className="bg-slate-900/50 border-slate-800 sticky top-8">
               <CardHeader className="pb-2">
@@ -516,7 +492,6 @@ export default function CalendarPage() {
               <CardContent>
                 {selectedDate ? (
                   <div>
-                    {/* Day Summary */}
                     {selectedDateTransactions.length > 0 && (
                       <div className="grid grid-cols-2 gap-2 mb-4">
                         <div className="p-2 rounded bg-slate-800/50">
@@ -542,8 +517,7 @@ export default function CalendarPage() {
                       </div>
                     )}
 
-                    {/* Transactions List */}
-                    <ScrollArea className="h-[400px] pr-4">
+                    <div className="h-[400px] overflow-y-auto pr-4">
                       {selectedDateTransactions.length > 0 ? (
                         <div className="space-y-2">
                           {selectedDateTransactions
@@ -584,7 +558,7 @@ export default function CalendarPage() {
                           <p className="text-slate-400 text-sm">No transactions on this day</p>
                         </div>
                       )}
-                    </ScrollArea>
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center py-8">
