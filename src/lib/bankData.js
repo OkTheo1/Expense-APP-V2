@@ -58,42 +58,72 @@ const DEFAULT_ACCOUNT_TYPE_NAMES = {
 const DEFAULT_CATEGORY_RULES = {
   'Salary': ['salary', 'wages', 'payroll', 'monthly salary', 'net pay', 'pay from', 'direct deposit', 'bonus', 'commission'],
   'Food & Dining': [
-    'tesco', 'sainsbury', 'asda', 'morrisons', 'ocado', 'waitrose', 'marks & spencer', 'm&s', 'marcus', 'aldi', 'lidl', 'iceland', 
-    'cafe', 'coffee', 'restaurant', 'pizza', 'burger', 'mcdonald', 'kfc', 'subway', 'deliveroo', 'uber eats', 'just eat', 'takeaway', 
-    'food', 'grocery', 'supermarket', 'greggs', 'costa', 'starbucks', 'nero', 'cinnamon', 'gail', 'bakery', 'pizza express', 
+    'tesco', 'sainsbury', 'asda', 'morrisons', 'ocado', 'waitrose', 'marks & spencer', 'm&s', 'marcus', 'aldi', 'lidl', 'iceland',
+    'cafe', 'coffee', 'restaurant', 'pizza', 'burger', 'mcdonald', 'kfc', 'subway', 'deliveroo', 'uber eats', 'just eat', 'takeaway',
+    'food', 'grocery', 'supermarket', 'greggs', 'costa', 'starbucks', 'nero', 'cinnamon', 'gail', 'bakery', 'pizza express',
     'burger king', 'wendy', 'tgi', 'zizzi', 'nando', 'ask italian', 'wagamama', 'jamie oliver', 'harvester', 'miller', 'carvery',
-    'thali', 'akash', 'taj', 'maharaja', 'golden dragon', 'wok to go', 'sushi', 'wasabi', 'itsu', 'yo', 'poke'
+    'thali', 'akash', 'taj', 'maharaja', 'golden dragon', 'wok to go', 'sushi', 'wasabi', 'itsu', 'yo sushi', 'poke',
+    // Added from real transaction data
+    'domino', 'londis', 'albert heijn', 'house of fries', 'giraffe', 'binini',
+    'co-op food', 'co op food', 'whole foods', 'leon', 'pret', 'five guys', 'shake shack',
+    'wetherspoons', 'spoons', 'gopuff', 'getir', 'gorillas', 'papa john', 'pizza hut'
   ],
   'Transportation': [
     'uber', 'lyft', 'taxi', 'train', 'rail', 'bus', 'tube', 'metro', 'petrol', 'fuel', 'shell', 'bp', 'esso', 'texaco', 'morrisons fuel',
-    'parking', 'car park', 'dvla', 'vehicle', 'car', 'tfl', 'transport for london', 'southwestern rail', 'great western',
+    'parking', 'car park', 'dvla', 'vehicle', 'tfl', 'transport for london', 'southwestern rail', 'great western',
     'virgin train', 'crosscountry', 'east midlands', 'northern rail', 'arriva', 'first bus', 'stagecoach', 'national express',
-    'uber eats', 'uber trip', 'bolt', 'kapten', 'electric charging', 'ev charging', 'bp pulse', 'pod point'
+    'uber trip', 'bolt', 'kapten', 'electric charging', 'ev charging', 'bp pulse', 'pod point',
+    // Added from real transaction data
+    'easyjet', 'lner', 'parkvia',
+    'ryanair', 'british airways', 'wizz air', 'jet2', 'eurostar', 'trainline', 'national rail',
+    'avanti', 'ncp', 'q-park', 'ringgo', 'justpark', 'dart charge', 'congestion charge', 'ulez',
+    'zipcar', 'enterprise rent', 'hertz', 'avis'
   ],
   'Housing': [
     'rent', 'mortgage', 'council tax', 'water', 'electricity', 'gas', 'energy', 'broadband', 'internet', 'tv', 'netflix', 'spotify',
-    'sky', 'virgin media', 'bt', 'talktalk', 'plusnet', 'shell energy', 'eon', 'edf', 'british gas', 'ovr2', ' utility warehouse',
-    'voxi', 'smarty', 'id', 'giffgaff', 'three', 'o2', 'vodafone', 'ee', 'phone', 'mobile', 'landline'
+    'sky', 'virgin media', 'bt', 'talktalk', 'plusnet', 'shell energy', 'eon', 'edf', 'british gas', 'utility warehouse',
+    'voxi', 'smarty', 'giffgaff', 'three', 'o2', 'vodafone', 'ee', 'phone', 'mobile', 'landline',
+    'octopus energy', 'bulb', 'ovo energy', 'thames water', 'anglian water', 'severn trent'
   ],
   'Shopping': [
     'amazon', 'ebay', 'argos', 'currys', 'john lewis', 'next', 'zara', 'h&m', 'primark', 'tk maxx', 'home bargains', 'poundland', 'ikea',
-    'Wilko', ' Wilkinson', 'asos', 'boohoo', 'pretty little thing', 'misguided', 'new look', 'river island', 'topshop', 'topman',
-    'mothercare', 'john Lewis', 'debenhams', 'marks & spencer', 'm&s', 'next', 'gap', 'uniqlo', 'massimo dutti', 'cos',
-    'apple', 'apple store', 'google store', 'currys pc', 'very', 'littlewoods', 'comet', 'dixons', 'richer sounds',
-    'carphone warehouse', 'mobile phones', 'car part', 'halfords', 'national tyres', 'kwik fit', 'point s', ' ATS Euromaster'
+    'wilko', 'wilkinson', 'asos', 'boohoo', 'pretty little thing', 'misguided', 'new look', 'river island', 'topshop', 'topman',
+    'mothercare', 'debenhams', 'gap', 'uniqlo', 'massimo dutti', 'cos',
+    'apple store', 'google store', 'currys pc', 'very', 'littlewoods', 'richer sounds',
+    'carphone warehouse', 'halfords', 'national tyres', 'kwik fit',
+    // Added from real transaction data
+    'whsmith', 'vinted', 'temu', 'swarovski', 'atrium',
+    'etsy', 'depop', 'shein', 'wish',
+    'jd sports', 'footlocker', 'schuh', 'clarks', 'dune',
+    'waterstones', 'foyles',
+    'b&q', 'homebase', 'screwfix', 'toolstation', 'wickes',
+    'dunelm', 'wayfair', 'furniture village',
+    'pets at home', 'jollyes'
   ],
   'Entertainment': [
-    'cinema', 'theatre', 'concert', 'ticket', 'game', 'steam', 'playstation', 'xbox', 'subscription', 'netflix', 'disney', 'spotify', 'apple music',
+    'cinema', 'theatre', 'concert', 'ticket', 'game', 'steam', 'playstation', 'xbox', 'netflix', 'disney', 'spotify', 'apple music',
     'amazon prime', 'amazon video', 'youtube', 'twitch', 'hulu', 'now tv', 'sky go', 'bbc iplayer', 'all 4', 'my5',
-    'ticketmaster', 'seetickets', 'eventim', 'axs', 'gigs', 'festival', 'cinemas', 'odeon', 'vue', 'cineworld', ' Showcase',
+    'ticketmaster', 'seetickets', 'eventim', 'axs', 'gigs', 'festival', 'odeon', 'vue', 'cineworld', 'showcase',
     'gaming', 'ea play', 'xbox game pass', 'ps plus', 'nintendo online', 'epic games', 'origin', 'ubisoft', 'blizzard',
-    'apple music', 'amazon music', 'soundcloud', 'deezer', 'tidal', 'pandora', 'podcast', 'audible', 'kindle'
+    'amazon music', 'soundcloud', 'deezer', 'tidal', 'pandora', 'podcast', 'audible', 'kindle',
+    // Added from real transaction data
+    'rustclash', 'loaded.com', 'adam lookout',
+    'betfair', 'paddy power', 'william hill', 'ladbrokes', 'bet365', 'sky bet', 'coral', 'betway', 'betfred',
+    'national lottery', 'lottery',
+    'museum', 'gallery', 'zoo', 'aquarium', 'theme park', 'alton towers', 'thorpe park',
+    'escape room', 'bowling', 'laser quest', 'go karting', 'paintball'
   ],
   'Health & Fitness': [
-    'gym', 'fitness', 'pharmacy', 'chemist', 'doctor', 'dentist', 'hospital', 'medical', 'health', 'boots', 'superdrug', 
+    'gym', 'fitness', 'pharmacy', 'chemist', 'doctor', 'dentist', 'hospital', 'medical', 'health', 'boots', 'superdrug',
     'optician', 'specsavers', 'vision express', 'savers', 'holland & barrett', 'myprotein', 'huel', 'slimming world',
-    'weight watchers', 'fitbit', 'whoop', 'garmin', 'nike', 'adidas', 'sports direct', 'decathlon', 'pure gym', 
-    'the gym', 'easy gym', 'gymgroup', 'arena', 'better', 'GLL', 'NHS', 'bupa', 'private healthcare', 'cigna'
+    'weight watchers', 'fitbit', 'whoop', 'garmin', 'nike', 'adidas', 'sports direct', 'decathlon', 'pure gym',
+    'the gym', 'easy gym', 'gymgroup', 'better', 'GLL', 'NHS', 'bupa', 'private healthcare', 'cigna',
+    // Added from real transaction data
+    'grüum', 'gruum',
+    'salon', 'hairdresser', 'barber', 'nail bar', 'beauty salon', 'waxing',
+    'vet', 'veterinary', 'vets4pets', 'medivet',
+    'nuffield health', 'david lloyd', 'virgin active', 'anytime fitness',
+    'yoga', 'pilates', 'crossfit', 'lloyds pharmacy', 'well pharmacy'
   ],
   'Insurance': [
     'insurance', 'aviva', 'direct line', 'churchill', 'axiom', 'legal & general', 'prudential', 'axa', 'rbs insurance',
@@ -101,21 +131,28 @@ const DEFAULT_CATEGORY_RULES = {
     'car insurance', 'home insurance', 'life insurance', 'travel insurance', 'pet insurance', 'mobile insurance'
   ],
   'Subscriptions': [
-    'subscription', 'membership', 'monthly', 'annual', 'premium', 'patreon', 'substack', 'medium', 'notion', 'slack',
+    'subscription', 'membership', 'patreon', 'substack', 'medium', 'notion', 'slack',
     'dropbox', 'google one', 'icloud', 'microsoft 365', 'adobe', 'canva', 'chatgpt', 'openai', 'github', 'gitlab',
-    'domain', 'hosting', 'website', 'wordPress', 'squarespace', 'wix', 'shopify', 'mailchimp', 'zapier'
+    'domain', 'hosting', 'squarespace', 'wix', 'shopify', 'mailchimp', 'zapier',
+    'disney plus', 'apple tv', 'apple arcade', 'britbox', 'paramount plus',
+    'duolingo', 'headspace', 'calm'
   ],
   'Transfer': [
     'transfer', 'payment sent', 'payment received', 'bank transfer', 'faster payment', 'chaps', 'bacs', 'standing order',
-    'direct debit', 'recurring payment', 'subscription', 'monzo', 'starling', 'revolut', 'wise', 'paypal', 'venmo',
+    'direct debit', 'recurring payment', 'monzo', 'starling', 'revolut', 'wise', 'paypal', 'venmo',
     'contactless', 'apple pay', 'google pay', 'samsung pay', 'fitbit pay', 'garmin pay',
     'sent from', 'payment to', 'received from', 'internal transfer', 'external transfer', 'faster payments',
     'bank payment', 'online transfer', 'telephone transfer', 'refund', 'reimbursement', 'return payment',
     'reversed transaction', 'qtrlg', 'pot transfer', 'savings transfer', 'balance transfer', 'flex',
     'barclaycard', 'loan payment', 'mortgage payment', 'direct credit', 'bank giro', 'interest credit',
-    'cash deposit', 'cheque', 'bacs credit', 'incoming transfer', 'outgoing transfer', 'standing order to',
-    'direct debit to', 'monzo-qtrlg', 'to monzo', 'from monzo', 'to starling', 'from starling',
-    'skrill', 'cashapp', 'zelle', 'trustly', 'clearbank', 'tap money', 'wise transfer'
+    'cash deposit', 'cheque', 'bacs credit', 'incoming transfer', 'outgoing transfer',
+    'monzo-qtrlg', 'to monzo', 'from monzo', 'to starling', 'from starling',
+    'skrill', 'cashapp', 'zelle', 'trustly', 'clearbank', 'tap money', 'wise transfer',
+    // Added from real transaction data
+    'saving challenge', 'claritycheu',
+    'coinbase', 'binance', 'kraken', 'crypto.com',
+    'vanguard', 'hargreaves lansdown', 'aj bell', 'freetrade', 'trading 212', 'etoro',
+    'moneybox', 'plum', 'chip', 'nutmeg', 'wealthify'
   ],
   'Cash': ['cash', 'atm', 'withdrawal', 'cashback', 'post office', 'paypoint', 'payzone', 'cash converters'],
   'Income': ['income', 'refund', 'reimbursement', 'cashback reward', 'interest', 'dividend', 'coupon', 'voucher']
@@ -144,8 +181,18 @@ export const saveCategoryRules = (rules) => {
 // Re-categorize only transactions currently labelled 'Uncategorized'
 export const recategorizeUncategorized = () => {
   const transactions = getBankTransactions();
-  const rules = getCategoryRules();
+  // Always use DEFAULT_CATEGORY_RULES so newly added keywords are picked up
+  // even if old rules are cached in localStorage
+  const rules = DEFAULT_CATEGORY_RULES;
   let updatedCount = 0;
+
+  // Log uncategorized descriptions to help improve rules
+  const uncategorized = transactions.filter(tx => (tx.category || 'Uncategorized') === 'Uncategorized');
+  if (uncategorized.length > 0) {
+    console.log('[Auto-Categorize] Uncategorized transactions:', 
+      uncategorized.map(tx => ({ description: tx.description, merchant: tx.merchant }))
+    );
+  }
 
   const updated = transactions.map(tx => {
     if ((tx.category || 'Uncategorized') === 'Uncategorized') {
@@ -166,7 +213,8 @@ export const recategorizeUncategorized = () => {
 // Skips transactions where the user has manually set a category (categoryOverride: true)
 export const recategorizeAll = () => {
   const transactions = getBankTransactions();
-  const rules = getCategoryRules();
+  // Always use DEFAULT_CATEGORY_RULES so newly added keywords are picked up
+  const rules = DEFAULT_CATEGORY_RULES;
   let updatedCount = 0;
 
   const updated = transactions.map(tx => {
@@ -208,9 +256,9 @@ export const categorizeTransaction = (description, rules = null) => {
   }
   
   // Detect person-to-person transfers: descriptions that look like full names
-  // e.g. "Marley Powell", "Dipok Powell", "Theodore powell", "Apostolis Ntema"
-  // Pattern: 2-4 words, first word starts with capital, no digits or special chars
-  const personNamePattern = /^[A-Z][a-zA-Z'-]{1,20}(\s[A-Za-z][a-zA-Z'-]{1,20}){1,3}$/;
+  // e.g. "Marley Powell", "michael lightley", "sonny thomson", "freddie wylie"
+  // Pattern: 2-4 words, each word is letters/apostrophes/hyphens only, no digits or special chars
+  const personNamePattern = /^[A-Za-z][a-zA-Z'-]{1,20}(\s[A-Za-z][a-zA-Z'-]{1,20}){1,3}$/;
   if (personNamePattern.test(description.trim())) {
     return 'Transfer';
   }
