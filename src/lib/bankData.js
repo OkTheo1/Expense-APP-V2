@@ -154,6 +154,14 @@ export const categorizeTransaction = (description, rules = null) => {
     }
   }
   
+  // Detect person-to-person transfers: descriptions that look like full names
+  // e.g. "Marley Powell", "Dipok Powell", "Theodore powell", "Apostolis Ntema"
+  // Pattern: 2-4 words, first word starts with capital, no digits or special chars
+  const personNamePattern = /^[A-Z][a-zA-Z'-]{1,20}(\s[A-Za-z][a-zA-Z'-]{1,20}){1,3}$/;
+  if (personNamePattern.test(description.trim())) {
+    return 'Transfer';
+  }
+  
   return 'Uncategorized';
 };
 
