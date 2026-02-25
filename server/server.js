@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 // Load environment variables
@@ -21,9 +22,42 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// File-based persistence for bank connections
+const CONNECTIONS_FILE = path.join(__dirname, 'bankConnections.json');
+
 // In-memory storage for multiple bank connections
 // Each connection has its own tokens and accounts
 let bankConnections = new Map();
+
+// Load connections from file on startup
+function loadConnections() {
+  try {
+    if (fs.existsSync(CONNECTIONS_FILE)) {
+      const data = fs.readFileSync(CONNECTIONS_FILE, 'utf8');
+      const connectionsArray = JSON.parse(data);
+      connectionsArray.forEach(conn => {
+        bankConnections.set(conn.id, conn);
+      });
+      console.log(`=== Loaded ${bankConnections.size} bank connections from file ===`);
+    }
+  } catch (error) {
+    console.error('Error loading connections:', error.message);
+  }
+}
+
+// Save connections to file
+function saveConnections() {
+  try {
+    const connectionsArray = Array.from(bankConnections.values());
+    fs.writeFileSync(CONNECTIONS_FILE, JSON.stringify(connectionsArray, null, 2));
+    console.log(`=== Saved ${connectionsArray.length} bank connections to file ===`);
+  } catch (error) {
+    console.error('Error saving connections:', error.message);
+  }
+}
+
+// Load connections on startup
+loadConnections();
 
 // Helper to get or create a connection
 function getConnection(connectionId = null) {
@@ -49,7 +83,7 @@ const TRUELAYER_AUTH_URL = 'https://auth.truelayer.com/';
 const TRUELAYER_API_URL = 'https://api.truelayer.com/';
 const CLIENT_ID = process.env.TRUE_LAYER_CLIENT_ID;
 const CLIENT_SECRET = process.env.TRUE_LAYER_CLIENT_SECRET;
-const REDIRECT_URI = 'http://localhost:3001/auth/truelayer/callback';
+const REDIRECT_URI = process.env.REDIRECT_URI || 'https://twelve-yaks-attack.loca.lt/auth/truelayer/callback';
 
 // Debug logging
 console.log('=== TrueLayer Configuration ===');
@@ -110,12 +144,13 @@ app.get('/auth/truelayer', (req, res) => {
   const state = JSON.stringify({ connectionId });
 
   // Include offline_access to get refresh token
+  // Use uk-ob-all for maximum coverage of UK banks and credit cards
   const authParams = new URLSearchParams({
     response_type: 'code',
     client_id: CLIENT_ID,
     redirect_uri: REDIRECT_URI,
     scope: 'info accounts balance transactions offline_access',
-    providers: 'uk-ob-all uk-oauth-all',
+    providers: 'uk-ob-all uk-oauth-all uk-cb-ob-all',
     state: state
   });
 
@@ -202,6 +237,9 @@ app.get('/auth/truelayer/callback', async (req, res) => {
     console.log('Fetching accounts...');
     await fetchAccounts(connection);
 
+    // Save connections to file
+    saveConnections();
+
     console.log('=== OAuth Flow Complete ===');
     console.log(`Total connections: ${bankConnections.size}`);
     res.redirect(`${process.env.FRONTEND_URL}/Settings?connected=true`);
@@ -220,17 +258,92 @@ app.get('/auth/truelayer/callback', async (req, res) => {
   }
 });
 
-// Fetch accounts from TrueLayer for a specific connection
-async function fetchAccounts(connection) {
+// Fetch balance for a specific account
+async function fetchAccountBalance(connection, accountId) {
   try {
-    const response = await axios.get(`${TRUELAYER_API_URL}data/v1/accounts`, {
+    // Try the standard balances endpoint
+    const response = await axios.get(`${TRUELAYER_API_URL}data/v1/accounts/${accountId}/balances`, {
       headers: {
         'Authorization': `Bearer ${connection.accessToken}`
       }
     });
 
-    connection.accounts = response.data.results || [];
-    console.log(`Fetched ${connection.accounts.length} accounts for connection ${connection.id}`);
+    // TrueLayer returns balance data in results array
+    // Take the first balance record (most recent)
+    if (response.data.results && response.data.results.length > 0) {
+      const balance = response.data.results[0];
+      return {
+        available: balance.available?.amount || 0,
+        current: balance.current?.amount || 0,
+        overdraft: balance.overlay?.overdraft?.amount || 0,
+        currency: balance.available?.currency || balance.current?.currency || 'GBP'
+      };
+    }
+    return null;
+  } catch (error) {
+    // If standard endpoint fails, try alternative endpoints
+    console.log(`Trying alternative balance endpoints for account ${accountId}...`);
+    
+    try {
+      // Try with /balance endpoint
+      const altResponse = await axios.get(`${TRUELAYER_API_URL}data/v1/accounts/${accountId}/balance`, {
+        headers: {
+          'Authorization': `Bearer ${connection.accessToken}`
+        }
+      });
+      
+      if (altResponse.data) {
+        const balance = altResponse.data;
+        return {
+          available: balance.available?.amount || balance.available || 0,
+          current: balance.current?.amount || balance.current || 0,
+          overdraft: balance.overlay?.overdraft?.amount || 0,
+          currency: balance.available?.currency || balance.current?.currency || 'GBP'
+        };
+      }
+    } catch (altError) {
+      console.log(`Alternative balance endpoint also failed for ${accountId}`);
+    }
+    
+    // Return a default balance object so accounts still show
+    console.log(`Could not fetch balance for account ${accountId}, using default`);
+    return {
+      available: 0,
+      current: 0,
+      overdraft: 0,
+      currency: 'GBP'
+    };
+  }
+}
+
+// Fetch accounts from TrueLayer for a specific connection
+async function fetchAccounts(connection) {
+  try {
+    console.log('=== Calling TrueLayer accounts API ===');
+    const accountsResponse = await axios.get(`${TRUELAYER_API_URL}data/v1/accounts`, {
+      headers: {
+        'Authorization': `Bearer ${connection.accessToken}`
+      }
+    });
+
+    console.log('TrueLayer accounts response:', JSON.stringify(accountsResponse.data, null, 2));
+    
+    const accounts = accountsResponse.data.results || [];
+    
+    // Fetch balances for each account
+    console.log(`Fetching balances for ${accounts.length} accounts...`);
+    for (const account of accounts) {
+      const balance = await fetchAccountBalance(connection, account.account_id);
+      if (balance) {
+        account.balance = balance;
+        console.log(`  Balance for ${account.display_name}: available=${balance.available}, current=${balance.current}`);
+      } else {
+        console.log(`  No balance data for ${account.display_name}`);
+      }
+    }
+
+    connection.accounts = accounts;
+    console.log(`Fetched ${connection.accounts.length} accounts with balances for connection ${connection.id}`);
     return connection.accounts;
   } catch (error) {
     console.error('Error fetching accounts:', error.response?.data || error.message);
@@ -346,13 +459,51 @@ async function getAllTransactions() {
 // Get accounts endpoint
 app.get('/api/accounts', async (req, res) => {
   try {
+    console.log('=== /api/accounts called ===');
     const accounts = await getAllAccounts();
+    console.log(`Returning ${accounts.length} accounts`);
     res.json({ accounts });
 
   } catch (error) {
     console.error('Error in /api/accounts:', error.response?.data || error.message);
     res.status(500).json({ error: 'Failed to fetch accounts' });
   }
+});
+
+// Debug endpoint to force refresh accounts
+app.post('/api/accounts/refresh', async (req, res) => {
+  try {
+    console.log('=== Force refreshing all accounts ===');
+    for (const [id, connection] of bankConnections) {
+      if (connection.accessToken) {
+        console.log(`Fetching accounts for connection ${id}...`);
+        try {
+          await fetchAccounts(connection);
+          console.log(`Got ${connection.accounts.length} accounts for ${id}`);
+        } catch (e) {
+          console.error(`Error fetching accounts for ${id}:`, e.message);
+        }
+      }
+    }
+    saveConnections();
+    res.json({ success: true, accounts: Array.from(bankConnections.values()).map(c => c.accounts).flat() });
+  } catch (error) {
+    console.error('Error refreshing accounts:', error);
+    res.status(500).json({ error: 'Failed to refresh accounts' });
+  }
+});
+
+// Debug endpoint to list all connections
+app.get('/api/debug/connections', (req, res) => {
+  const connections = Array.from(bankConnections.values()).map(conn => ({
+    id: conn.id,
+    hasAccessToken: !!conn.accessToken,
+    hasRefreshToken: !!conn.refreshToken,
+    expiresAt: conn.expiresAt,
+    accountsCount: conn.accounts.length,
+    providerId: conn.providerId
+  }));
+  res.json({ connections });
 });
 
 // Get transactions endpoint
@@ -398,6 +549,9 @@ async function refreshToken(connection) {
   connection.refreshToken = response.data.refresh_token;
   connection.expiresAt = Date.now() + (response.data.expires_in * 1000);
 
+  // Save connections to file after refresh
+  saveConnections();
+
   console.log(`Token refreshed successfully for connection ${connection.id}`);
 }
 
@@ -409,6 +563,8 @@ app.post('/auth/truelayer/refresh', async (req, res) => {
         await refreshToken(connection);
       }
     }
+    // Save after refresh
+    saveConnections();
     res.json({ success: true });
   } catch (error) {
     console.error('Refresh error:', error.response?.data || error.message);
@@ -419,6 +575,8 @@ app.post('/auth/truelayer/refresh', async (req, res) => {
 // Disconnect endpoint - removes all connections
 app.post('/auth/truelayer/disconnect', (req, res) => {
   bankConnections.clear();
+  // Save to file after disconnect
+  saveConnections();
   console.log('Disconnected all banks from TrueLayer');
   res.json({ success: true });
 });
@@ -428,6 +586,8 @@ app.post('/auth/truelayer/disconnect/:connectionId', (req, res) => {
   const { connectionId } = req.params;
   if (bankConnections.has(connectionId)) {
     bankConnections.delete(connectionId);
+    // Save to file after disconnect
+    saveConnections();
     console.log(`Disconnected bank: ${connectionId}`);
     res.json({ success: true });
   } else {
