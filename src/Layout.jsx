@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { 
   LayoutDashboard, Receipt, PiggyBank, BarChart3, 
   ChevronLeft, ChevronRight, Wallet, Settings,
-  TrendingUp, Target, Calculator, User, Plus, Repeat, Building2
+  TrendingUp, Target, Calculator, User, Plus, Repeat, Building2, Calendar
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,6 +14,7 @@ const navItems = [
   { name: 'Dashboard', icon: LayoutDashboard, page: 'Dashboard' },
   { name: 'Bank', icon: Building2, page: 'Bank' },
   { name: 'Transactions', icon: Receipt, page: 'Expenses' },
+  { name: 'Calendar', icon: Calendar, page: 'Calendar' },
   { name: 'Recurring', icon: Repeat, page: 'RecurringTransactions' },
   { name: 'Budgets', icon: PiggyBank, page: 'Budgets' },
   { name: 'Analytics', icon: BarChart3, page: 'Analytics' },

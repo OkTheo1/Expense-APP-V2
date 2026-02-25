@@ -57,6 +57,7 @@ import Goals from './pages/Goals';
 import Debt from './pages/Debt';
 import RecurringTransactions from './pages/RecurringTransactions';
 import Bank from './pages/Bank';
+import Calendar from './pages/Calendar';
 import __Layout from './Layout.jsx';
 
 
@@ -71,6 +72,7 @@ export const PAGES = {
     "Debt": Debt,
     "RecurringTransactions": RecurringTransactions,
     "Bank": Bank,
+    "Calendar": Calendar,
 }
 
 export const pagesConfig = {
