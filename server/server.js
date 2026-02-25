@@ -83,7 +83,7 @@ const TRUELAYER_AUTH_URL = 'https://auth.truelayer.com/';
 const TRUELAYER_API_URL = 'https://api.truelayer.com/';
 const CLIENT_ID = process.env.TRUE_LAYER_CLIENT_ID;
 const CLIENT_SECRET = process.env.TRUE_LAYER_CLIENT_SECRET;
-const REDIRECT_URI = process.env.REDIRECT_URI || 'https://spatial-sector-attached-rows.trycloudflare.com/auth/truelayer/callback';
+const REDIRECT_URI = process.env.REDIRECT_URI || 'http://localhost:5174/auth/truelayer/callback';
 
 // Debug logging
 console.log('=== TrueLayer Configuration ===');
