@@ -163,12 +163,16 @@ export const recategorizeUncategorized = () => {
 };
 
 // Re-categorize ALL stored transactions (useful after rule updates)
+// Skips transactions where the user has manually set a category (categoryOverride: true)
 export const recategorizeAll = () => {
   const transactions = getBankTransactions();
   const rules = getCategoryRules();
   let updatedCount = 0;
 
   const updated = transactions.map(tx => {
+    // Preserve manual overrides
+    if (tx.categoryOverride) return tx;
+
     const newCategory = categorizeTransaction(tx.description || tx.merchant || '', rules);
     if (newCategory !== (tx.category || 'Uncategorized')) {
       updatedCount++;
