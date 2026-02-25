@@ -31,7 +31,8 @@ import {
   getBankName, 
   filterByBank,
   filterAccountsByBank,
-  getTotalBankBalance,\n  getFilteredBankBalance,
+  getTotalBankBalance,
+  getFilteredBankBalance,
   fetchBankAccounts,
   fetchBankTransactions,
   checkBankConnection,
@@ -360,8 +361,8 @@ export default function Dashboard() {
   const totalSpent = bankExpenses;
   const totalIncome = bankIncome;
   
-  // All-time balance (total income - total expenses) - bank only
-  // Use actual bank balance from API (current balance, not available which includes overdraft)\n  const balance = getTotalBankBalance();
+  // Use actual bank balance from API (current balance, not available which includes overdraft)
+  const balance = getTotalBankBalance();
   const totalBudget = budgets.reduce((sum, b) => sum + b.limit, 0);
   
   // Calculate expected monthly income from recurring transactions
