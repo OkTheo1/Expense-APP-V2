@@ -108,7 +108,14 @@ const DEFAULT_CATEGORY_RULES = {
   'Transfer': [
     'transfer', 'payment sent', 'payment received', 'bank transfer', 'faster payment', 'chaps', 'bacs', 'standing order',
     'direct debit', 'recurring payment', 'subscription', 'monzo', 'starling', 'revolut', 'wise', 'paypal', 'venmo',
-    'contactless', 'apple pay', 'google pay', 'samsung pay', 'fitbit pay', 'garmin pay'
+    'contactless', 'apple pay', 'google pay', 'samsung pay', 'fitbit pay', 'garmin pay',
+    'sent from', 'payment to', 'received from', 'internal transfer', 'external transfer', 'faster payments',
+    'bank payment', 'online transfer', 'telephone transfer', 'refund', 'reimbursement', 'return payment',
+    'reversed transaction', 'qtrlg', 'pot transfer', 'savings transfer', 'balance transfer', 'flex',
+    'barclaycard', 'loan payment', 'mortgage payment', 'direct credit', 'bank giro', 'interest credit',
+    'cash deposit', 'cheque', 'bacs credit', 'incoming transfer', 'outgoing transfer', 'standing order to',
+    'direct debit to', 'monzo-qtrlg', 'to monzo', 'from monzo', 'to starling', 'from starling',
+    'skrill', 'cashapp', 'zelle', 'trustly', 'clearbank', 'tap money', 'wise transfer'
   ],
   'Cash': ['cash', 'atm', 'withdrawal', 'cashback', 'post office', 'paypoint', 'payzone', 'cash converters'],
   'Income': ['income', 'refund', 'reimbursement', 'cashback reward', 'interest', 'dividend', 'coupon', 'voucher']
