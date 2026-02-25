@@ -83,7 +83,7 @@ const TRUELAYER_AUTH_URL = 'https://auth.truelayer.com/';
 const TRUELAYER_API_URL = 'https://api.truelayer.com/';
 const CLIENT_ID = process.env.TRUE_LAYER_CLIENT_ID;
 const CLIENT_SECRET = process.env.TRUE_LAYER_CLIENT_SECRET;
-const REDIRECT_URI = process.env.REDIRECT_URI || 'https://twelve-yaks-attack.loca.lt/auth/truelayer/callback';
+const REDIRECT_URI = process.env.REDIRECT_URI || 'https://budgettracker-expense-app.loca.lt/auth/truelayer/callback';
 
 // Debug logging
 console.log('=== TrueLayer Configuration ===');
