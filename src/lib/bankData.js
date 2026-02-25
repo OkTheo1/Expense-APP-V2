@@ -54,19 +54,64 @@ const DEFAULT_ACCOUNT_TYPE_NAMES = {
   'loan': 'Loan'
 };
 
-// Default category rules for auto-categorization
+// Default category rules for auto-categorization - enhanced with more UK merchants
 const DEFAULT_CATEGORY_RULES = {
-  'Salary': ['salary', 'wages', 'payroll', 'monthly salary', 'net pay'],
-  'Food & Dining': ['tesco', 'sainsbury', 'asda', 'morrisons', 'ocado', 'waitrose', 'marks & spencer', 'm&s', 'cafe', 'coffee', 'restaurant', 'pizza', 'burger', 'mcdonald', 'kfc', 'subway', 'deliveroo', 'uber eats', 'just eat', 'takeaway', 'food', 'grocery', 'supermarket'],
-  'Transportation': ['uber', 'lyft', 'taxi', 'train', 'rail', 'bus', 'tube', 'metro', 'petrol', 'fuel', 'shell', 'bp', 'esso', 'parking', 'car park', 'dvla', 'vehicle', 'car'],
-  'Housing': ['rent', 'mortgage', 'council tax', 'water', 'electricity', 'gas', 'energy', 'broadband', 'internet', 'tv', 'netflix', 'spotify'],
-  'Shopping': ['amazon', 'ebay', 'argos', 'currys', 'john lewis', 'next', 'zara', 'h&m', 'primark', 'tk maxx', 'home bargains', 'poundland', 'ikea'],
-  'Entertainment': ['cinema', 'theatre', 'concert', 'ticket', 'game', 'steam', 'playstation', 'xbox', 'subscription', 'netflix', 'disney', 'spotify', 'apple music'],
-  'Health & Fitness': ['gym', 'fitness', 'pharmacy', 'chemist', 'doctor', 'dentist', 'hospital', 'medical', 'health', 'boots'],
-  'Insurance': ['insurance', 'aviva', 'direct line', 'churchill', 'axiom', 'legal & general'],
-  'Subscriptions': ['subscription', 'membership', 'monthly', 'annual', 'premium'],
-  'Transfer': ['transfer', 'payment sent', 'payment received', 'bank transfer', 'faster payment'],
-  'Cash': ['cash', 'atm', 'withdrawal', 'cashback']
+  'Salary': ['salary', 'wages', 'payroll', 'monthly salary', 'net pay', 'pay from', 'direct deposit', 'bonus', 'commission'],
+  'Food & Dining': [
+    'tesco', 'sainsbury', 'asda', 'morrisons', 'ocado', 'waitrose', 'marks & spencer', 'm&s', 'marcus', 'aldi', 'lidl', 'iceland', 
+    'cafe', 'coffee', 'restaurant', 'pizza', 'burger', 'mcdonald', 'kfc', 'subway', 'deliveroo', 'uber eats', 'just eat', 'takeaway', 
+    'food', 'grocery', 'supermarket', 'greggs', 'costa', 'starbucks', 'nero', 'cinnamon', 'gail', 'bakery', 'pizza express', 
+    'burger king', 'wendy', 'tgi', 'zizzi', 'nando', 'ask italian', 'wagamama', 'jamie oliver', 'harvester', 'miller', 'carvery',
+    'thali', 'akash', 'taj', 'maharaja', 'golden dragon', 'wok to go', 'sushi', 'wasabi', 'itsu', 'yo', 'poke'
+  ],
+  'Transportation': [
+    'uber', 'lyft', 'taxi', 'train', 'rail', 'bus', 'tube', 'metro', 'petrol', 'fuel', 'shell', 'bp', 'esso', 'texaco', 'morrisons fuel',
+    'parking', 'car park', 'dvla', 'vehicle', 'car', 'tfl', 'transport for london', 'southwestern rail', 'great western',
+    'virgin train', 'crosscountry', 'east midlands', 'northern rail', 'arriva', 'first bus', 'stagecoach', 'national express',
+    'uber eats', 'uber trip', 'bolt', 'kapten', 'electric charging', 'ev charging', 'bp pulse', 'pod point'
+  ],
+  'Housing': [
+    'rent', 'mortgage', 'council tax', 'water', 'electricity', 'gas', 'energy', 'broadband', 'internet', 'tv', 'netflix', 'spotify',
+    'sky', 'virgin media', 'bt', 'talktalk', 'plusnet', 'shell energy', 'eon', 'edf', 'british gas', 'ovr2', ' utility warehouse',
+    'voxi', 'smarty', 'id', 'giffgaff', 'three', 'o2', 'vodafone', 'ee', 'phone', 'mobile', 'landline'
+  ],
+  'Shopping': [
+    'amazon', 'ebay', 'argos', 'currys', 'john lewis', 'next', 'zara', 'h&m', 'primark', 'tk maxx', 'home bargains', 'poundland', 'ikea',
+    'Wilko', ' Wilkinson', 'asos', 'boohoo', 'pretty little thing', 'misguided', 'new look', 'river island', 'topshop', 'topman',
+    'mothercare', 'john Lewis', 'debenhams', 'marks & spencer', 'm&s', 'next', 'gap', 'uniqlo', 'massimo dutti', 'cos',
+    'apple', 'apple store', 'google store', 'currys pc', 'very', 'littlewoods', 'comet', 'dixons', 'richer sounds',
+    'carphone warehouse', 'mobile phones', 'car part', 'halfords', 'national tyres', 'kwik fit', 'point s', ' ATS Euromaster'
+  ],
+  'Entertainment': [
+    'cinema', 'theatre', 'concert', 'ticket', 'game', 'steam', 'playstation', 'xbox', 'subscription', 'netflix', 'disney', 'spotify', 'apple music',
+    'amazon prime', 'amazon video', 'youtube', 'twitch', 'hulu', 'now tv', 'sky go', 'bbc iplayer', 'all 4', 'my5',
+    'ticketmaster', 'seetickets', 'eventim', 'axs', 'gigs', 'festival', 'cinemas', 'odeon', 'vue', 'cineworld', ' Showcase',
+    'gaming', 'ea play', 'xbox game pass', 'ps plus', 'nintendo online', 'epic games', 'origin', 'ubisoft', 'blizzard',
+    'apple music', 'amazon music', 'soundcloud', 'deezer', 'tidal', 'pandora', 'podcast', 'audible', 'kindle'
+  ],
+  'Health & Fitness': [
+    'gym', 'fitness', 'pharmacy', 'chemist', 'doctor', 'dentist', 'hospital', 'medical', 'health', 'boots', 'superdrug', 
+    'optician', 'specsavers', 'vision express', 'savers', 'holland & barrett', 'myprotein', 'huel', 'slimming world',
+    'weight watchers', 'fitbit', 'whoop', 'garmin', 'nike', 'adidas', 'sports direct', 'decathlon', 'pure gym', 
+    'the gym', 'easy gym', 'gymgroup', 'arena', 'better', 'GLL', 'NHS', 'bupa', 'private healthcare', 'cigna'
+  ],
+  'Insurance': [
+    'insurance', 'aviva', 'direct line', 'churchill', 'axiom', 'legal & general', 'prudential', 'axa', 'rbs insurance',
+    'lloyds insurance', 'barclays insurance', 'saga', 'age uk', 'compare the market', 'gocompare', 'money supermarket',
+    'car insurance', 'home insurance', 'life insurance', 'travel insurance', 'pet insurance', 'mobile insurance'
+  ],
+  'Subscriptions': [
+    'subscription', 'membership', 'monthly', 'annual', 'premium', 'patreon', 'substack', 'medium', 'notion', 'slack',
+    'dropbox', 'google one', 'icloud', 'microsoft 365', 'adobe', 'canva', 'chatgpt', 'openai', 'github', 'gitlab',
+    'domain', 'hosting', 'website', 'wordPress', 'squarespace', 'wix', 'shopify', 'mailchimp', 'zapier'
+  ],
+  'Transfer': [
+    'transfer', 'payment sent', 'payment received', 'bank transfer', 'faster payment', 'chaps', 'bacs', 'standing order',
+    'direct debit', 'recurring payment', 'subscription', 'monzo', 'starling', 'revolut', 'wise', 'paypal', 'venmo',
+    'contactless', 'apple pay', 'google pay', 'samsung pay', 'fitbit pay', 'garmin pay'
+  ],
+  'Cash': ['cash', 'atm', 'withdrawal', 'cashback', 'post office', 'paypoint', 'payzone', 'cash converters'],
+  'Income': ['income', 'refund', 'reimbursement', 'cashback reward', 'interest', 'dividend', 'coupon', 'voucher']
 };
 
 // Get bank accounts
