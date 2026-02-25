@@ -146,13 +146,13 @@ export const fetchBankTransactions = async () => {
   }
 };
 
-// Get total balance from all accounts (includes overdraft)
+// Get total balance from all accounts (uses current/actual balance, not available which includes overdraft)
 export const getTotalBankBalance = () => {
   const accounts = getBankAccounts();
   return accounts.reduce((total, account) => {
-    const available = account.balance?.available || account.balance?.current || 0;
-    const overdraft = account.balance?.overdraft || 0;
-    return total + available + overdraft;
+    // Use current balance (actual account balance) instead of available
+    const current = account.balance?.current ?? account.balance?.available ?? 0;
+    return total + current;
   }, 0);
 };
 
@@ -403,12 +403,11 @@ export const filterAccountsByBank = (accounts, selectedValue) => {
   }
 };
 
-// Get total balance from filtered accounts (includes overdraft)
+// Get total balance from filtered accounts (uses current/actual balance, not available which includes overdraft)
 export const getFilteredBankBalance = (accounts) => {
   return accounts.reduce((total, account) => {
-    const available = account.balance?.available || account.balance?.current || 0;
-    const overdraft = account.balance?.overdraft || 0;
-    return total + available + overdraft;
+    const current = account.balance?.current ?? account.balance?.available ?? 0;
+    return total + current;
   }, 0);
 };
 

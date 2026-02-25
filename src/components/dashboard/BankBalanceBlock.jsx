@@ -168,9 +168,9 @@ export default function BankBalanceBlock({ currency = 'GBP', accounts: propAccou
 
       <div className="space-y-3">
         {accounts.map((account, index) => {
-          const available = account.balance?.available || account.balance?.current || 0;
+          // Use current balance (actual account balance) instead of available (which includes overdraft)
+          const current = account.balance?.current ?? account.balance?.available ?? 0;
           const overdraft = account.balance?.overdraft || 0;
-          const displayBalance = available + overdraft;
           
           return (
             <div key={index} className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg">
@@ -184,8 +184,8 @@ export default function BankBalanceBlock({ currency = 'GBP', accounts: propAccou
                   </p>
                 </div>
               </div>
-              <p className="text-white font-medium">
-                {formatCurrency(displayBalance)}
+              <p className={`font-medium ${current < 0 ? 'text-red-400' : 'text-white'}`}>
+                {formatCurrency(current)}
               </p>
             </div>
           );

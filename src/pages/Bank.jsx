@@ -328,7 +328,7 @@ export default function Bank() {
                         </p>
                         {account.balance && (
                           <p className="text-green-400 text-sm mt-1">
-                            {formatAmount(account.balance.available || account.balance.current || 0)}
+                            {formatAmount(account.balance.current ?? account.balance.available ?? 0)}
                           </p>
                         )}
                       </div>
