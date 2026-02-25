@@ -6,7 +6,7 @@
 - [x] 2. Add `recategorizeAll()` to `src/lib/bankData.js`
 - [x] 3. Add `updateTransactionCategory()` to `src/lib/bankData.js`
 - [x] 4. Update `src/pages/Expenses.jsx` — auto-categorize banner + inline category editing
-- [ ] 5. Git commit
+- [x] 5. Git commit
 
 ---
 
