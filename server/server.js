@@ -456,8 +456,14 @@ async function getAllTransactions() {
         allTransactions.push(...normalized);
 
       } catch (txError) {
-        console.error(`Error fetching transactions for account ${account.account_id}:`, 
-          txError.response?.data || txError.message);
+        const errData = txError.response?.data;
+        console.error(`Error fetching transactions for account ${account.account_id}:`, errData || txError.message);
+        
+        // SCA expired - mark connection as needing re-auth
+        if (errData?.error === 'sca_exceeded') {
+          connection.scaExpired = true;
+          saveConnections();
+        }
       }
     }
   }
@@ -526,7 +532,17 @@ app.get('/api/transactions', async (req, res) => {
     
     const transactions = await getAllTransactions();
     console.log(`Total transactions: ${transactions.length}`);
-    res.json({ transactions });
+
+    // Check if all connections have SCA expired
+    const connections = Array.from(bankConnections.values());
+    const allScaExpired = connections.length > 0 && connections.every(c => c.scaExpired);
+    const anyScaExpired = connections.some(c => c.scaExpired);
+
+    res.json({ 
+      transactions,
+      scaExpired: anyScaExpired,
+      requiresReauth: allScaExpired
+    });
 
   } catch (error) {
     console.error('=== Transactions Error ===');

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Building2, RefreshCw, Loader2, Plus, Trash2, Edit2, Save, X } from 'lucide-react';
+import { ArrowLeft, Building2, RefreshCw, Loader2, Plus, Trash2, Edit2, Save, X, AlertTriangle } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { toast } from 'sonner';
 import {
@@ -42,6 +42,7 @@ export default function Bank() {
   const [editingAccountId, setEditingAccountId] = useState(null);
   const [editCustomName, setEditCustomName] = useState('');
   const [bankToRemove, setBankToRemove] = useState(null);
+  const [scaExpired, setScaExpired] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -55,6 +56,17 @@ export default function Bank() {
       if (status.connected) {
         const apiAccounts = await fetchBankAccounts();
         setAccounts(apiAccounts);
+
+        // Check if SCA has expired by calling transactions endpoint
+        try {
+          const txRes = await fetch(`${API_BASE}/api/transactions`);
+          const txData = await txRes.json();
+          if (txData.scaExpired) {
+            setScaExpired(true);
+          }
+        } catch (e) {
+          // ignore
+        }
       }
     } catch (error) {
       console.error('Error loading bank data:', error);
@@ -217,6 +229,26 @@ export default function Bank() {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Dashboard
         </Link>
+
+        {/* SCA Expired Banner */}
+        {scaExpired && (
+          <div className="mb-6 flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4">
+            <AlertTriangle className="h-5 w-5 text-amber-400 mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="text-amber-300 font-medium">Re-authentication required</p>
+              <p className="text-amber-400/80 text-sm mt-1">
+                Your bank session has expired (SCA). Transaction data cannot be fetched until you reconnect.
+              </p>
+            </div>
+            <Button
+              onClick={handleConnectBank}
+              className="bg-amber-500 hover:bg-amber-600 text-black shrink-0"
+              size="sm"
+            >
+              Reconnect Bank
+            </Button>
+          </div>
+        )}
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
