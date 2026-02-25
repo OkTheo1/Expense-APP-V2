@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ArrowLeft, Search, Filter, Download, TrendingUp, TrendingDown, Building2, Plus, Loader2 } from 'lucide-react';
+import { ArrowLeft, Search, Filter, Download, TrendingUp, TrendingDown, Building2, Plus, Loader2, Sparkles, RefreshCw, Tag } from 'lucide-react';
 import { format, parseISO, subMonths } from 'date-fns';
 import { toast } from 'sonner';
 import { 
@@ -15,7 +15,10 @@ import {
   fetchBankAccounts,
   getBankAccounts,
   getAccountDisplayName,
-  getAccountCustomName
+  getAccountCustomName,
+  recategorizeUncategorized,
+  recategorizeAll,
+  updateTransactionCategory
 } from '@/lib/bankData';
 
 const CATEGORY_ICONS = {
@@ -30,8 +33,25 @@ const CATEGORY_ICONS = {
   'Subscriptions': '📱',
   'Transfer': '↔️',
   'Cash': '💵',
+  'Income': '📈',
   'Uncategorized': '❓'
 };
+
+const ALL_CATEGORIES = [
+  'Food & Dining',
+  'Transportation',
+  'Housing',
+  'Shopping',
+  'Entertainment',
+  'Health & Fitness',
+  'Insurance',
+  'Salary',
+  'Subscriptions',
+  'Transfer',
+  'Cash',
+  'Income',
+  'Uncategorized'
+];
 
 export default function Expenses() {
   const [isConnected, setIsConnected] = useState(false);
@@ -39,11 +59,13 @@ export default function Expenses() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isCategorizing, setIsCategorizing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [accountFilter, setAccountFilter] = useState('all');
   const [monthFilter, setMonthFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [editingCategoryTxId, setEditingCategoryTxId] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -93,6 +115,53 @@ export default function Expenses() {
     } finally {
       setIsRefreshing(false);
     }
+  };
+
+  const uncategorizedCount = useMemo(() => {
+    return transactions.filter(tx => (tx.category || 'Uncategorized') === 'Uncategorized').length;
+  }, [transactions]);
+
+  const handleAutoCategorize = () => {
+    setIsCategorizing(true);
+    try {
+      const result = recategorizeUncategorized();
+      // Reload from storage
+      const updated = getBankTransactions();
+      setTransactions(updated);
+      if (result.updated > 0) {
+        toast.success(`Auto-categorized ${result.updated} transaction${result.updated !== 1 ? 's' : ''}`);
+      } else {
+        toast.info('No new categories could be determined — transactions remain uncategorized');
+      }
+    } catch (err) {
+      console.error('Auto-categorize error:', err);
+      toast.error('Failed to auto-categorize transactions');
+    } finally {
+      setIsCategorizing(false);
+    }
+  };
+
+  const handleRecategorizeAll = () => {
+    setIsCategorizing(true);
+    try {
+      const result = recategorizeAll();
+      const updated = getBankTransactions();
+      setTransactions(updated);
+      toast.success(`Re-categorized all ${result.total} transactions (${result.updated} changed)`);
+    } catch (err) {
+      console.error('Re-categorize all error:', err);
+      toast.error('Failed to re-categorize transactions');
+    } finally {
+      setIsCategorizing(false);
+    }
+  };
+
+  const handleCategoryChange = (txId, newCategory) => {
+    updateTransactionCategory(txId, newCategory);
+    const updated = getBankTransactions();
+    setTransactions(updated);
+    setEditingCategoryTxId(null);
+    toast.success(`Category updated to ${newCategory}`);
   };
 
   const exportToCSV = () => {
@@ -281,7 +350,20 @@ export default function Expenses() {
               {filteredTransactions.length} transactions from {accounts.length} account{accounts.length !== 1 ? 's' : ''}
             </p>
           </div>
-          <div className="flex gap-2 mt-4 sm:mt-0">
+          <div className="flex flex-wrap gap-2 mt-4 sm:mt-0">
+            <Button
+              onClick={handleRecategorizeAll}
+              disabled={isCategorizing || isRefreshing}
+              variant="outline"
+              title="Re-run categorization on all transactions"
+            >
+              {isCategorizing ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Re-categorize All
+            </Button>
             <Button
               onClick={refreshData}
               disabled={isRefreshing}
@@ -304,6 +386,31 @@ export default function Expenses() {
             </Button>
           </div>
         </div>
+
+        {/* Uncategorized Banner */}
+        {uncategorizedCount > 0 && (
+          <div className="mb-6 flex items-center justify-between gap-4 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <Sparkles className="h-5 w-5 text-amber-400 shrink-0" />
+              <p className="text-amber-300 text-sm">
+                <span className="font-semibold">{uncategorizedCount}</span> transaction{uncategorizedCount !== 1 ? 's' : ''} {uncategorizedCount !== 1 ? 'are' : 'is'} uncategorized
+              </p>
+            </div>
+            <Button
+              size="sm"
+              onClick={handleAutoCategorize}
+              disabled={isCategorizing}
+              className="bg-amber-500 hover:bg-amber-600 text-black shrink-0"
+            >
+              {isCategorizing ? (
+                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+              ) : (
+                <Sparkles className="h-3 w-3 mr-1" />
+              )}
+              Auto-Categorize
+            </Button>
+          </div>
+        )}
 
         {/* Summary Cards */}
         <div className="grid grid-cols-2 gap-4 mb-6">
@@ -440,9 +547,41 @@ export default function Expenses() {
                             </div>
                             <div>
                               <p className="font-medium text-white">{tx.merchant || tx.description || 'Unknown'}</p>
-                              <p className="text-sm text-slate-400">
-                                {tx.category || 'Uncategorized'} · {getTransactionAccountName(tx)}
-                              </p>
+                              <div className="flex items-center gap-1 mt-0.5">
+                                {editingCategoryTxId === tx.id ? (
+                                  <Select
+                                    value={tx.category || 'Uncategorized'}
+                                    onValueChange={(val) => handleCategoryChange(tx.id, val)}
+                                    onOpenChange={(open) => { if (!open) setEditingCategoryTxId(null); }}
+                                  >
+                                    <SelectTrigger className="h-6 text-xs bg-slate-700 border-slate-600 text-white w-44 px-2">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-slate-800 border-slate-700">
+                                      {ALL_CATEGORIES.map(cat => (
+                                        <SelectItem key={cat} value={cat} className="text-slate-200 text-xs">
+                                          {CATEGORY_ICONS[cat] || '📦'} {cat}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                ) : (
+                                  <button
+                                    onClick={() => setEditingCategoryTxId(tx.id)}
+                                    className={`flex items-center gap-1 text-xs rounded px-1.5 py-0.5 transition-colors group ${
+                                      (tx.category || 'Uncategorized') === 'Uncategorized'
+                                        ? 'text-amber-400 hover:bg-amber-500/20'
+                                        : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+                                    }`}
+                                    title="Click to change category"
+                                  >
+                                    <Tag className="h-3 w-3 opacity-60 group-hover:opacity-100" />
+                                    {tx.category || 'Uncategorized'}
+                                  </button>
+                                )}
+                                <span className="text-slate-600 text-xs">·</span>
+                                <span className="text-slate-400 text-xs">{getTransactionAccountName(tx)}</span>
+                              </div>
                             </div>
                           </div>
                           <div className="text-right">

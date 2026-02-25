@@ -1,4 +1,16 @@
-# TODO - Bank-Focused Website Remodel
+# TODO - Auto-Categorise Uncategorised Transactions
+
+## Steps
+
+- [x] 1. Add `recategorizeUncategorized()` to `src/lib/bankData.js`
+- [x] 2. Add `recategorizeAll()` to `src/lib/bankData.js`
+- [x] 3. Add `updateTransactionCategory()` to `src/lib/bankData.js`
+- [x] 4. Update `src/pages/Expenses.jsx` — auto-categorize banner + inline category editing
+- [ ] 5. Git commit
+
+---
+
+# Previous TODO - Bank-Focused Website Remodel
 
 ## Phase 1: Core Components
 - [ ] Create BankSelector component (reusable dropdown for bank/account filtering)

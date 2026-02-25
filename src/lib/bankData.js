@@ -141,6 +141,55 @@ export const saveCategoryRules = (rules) => {
   saveToStorage(STORAGE_KEYS.BANK_CATEGORIES, rules);
 };
 
+// Re-categorize only transactions currently labelled 'Uncategorized'
+export const recategorizeUncategorized = () => {
+  const transactions = getBankTransactions();
+  const rules = getCategoryRules();
+  let updatedCount = 0;
+
+  const updated = transactions.map(tx => {
+    if ((tx.category || 'Uncategorized') === 'Uncategorized') {
+      const newCategory = categorizeTransaction(tx.description || tx.merchant || '', rules);
+      if (newCategory !== 'Uncategorized') {
+        updatedCount++;
+        return { ...tx, category: newCategory };
+      }
+    }
+    return tx;
+  });
+
+  saveToStorage(STORAGE_KEYS.BANK_TRANSACTIONS, updated);
+  return { updated: updatedCount, total: transactions.length };
+};
+
+// Re-categorize ALL stored transactions (useful after rule updates)
+export const recategorizeAll = () => {
+  const transactions = getBankTransactions();
+  const rules = getCategoryRules();
+  let updatedCount = 0;
+
+  const updated = transactions.map(tx => {
+    const newCategory = categorizeTransaction(tx.description || tx.merchant || '', rules);
+    if (newCategory !== (tx.category || 'Uncategorized')) {
+      updatedCount++;
+    }
+    return { ...tx, category: newCategory };
+  });
+
+  saveToStorage(STORAGE_KEYS.BANK_TRANSACTIONS, updated);
+  return { updated: updatedCount, total: transactions.length };
+};
+
+// Manually update a single transaction's category
+export const updateTransactionCategory = (transactionId, newCategory) => {
+  const transactions = getBankTransactions();
+  const updated = transactions.map(tx =>
+    tx.id === transactionId ? { ...tx, category: newCategory, categoryOverride: true } : tx
+  );
+  saveToStorage(STORAGE_KEYS.BANK_TRANSACTIONS, updated);
+  return updated.find(tx => tx.id === transactionId) || null;
+};
+
 // Auto-categorize a transaction based on description
 export const categorizeTransaction = (description, rules = null) => {
   const categoryRules = rules || getCategoryRules();
