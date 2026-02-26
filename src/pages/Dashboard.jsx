@@ -12,6 +12,7 @@ import RecentTransactionsBlock from '@/components/dashboard/RecentTransactionsBl
 import ProjectedExpensesBlock from '@/components/dashboard/ProjectedExpensesBlock';
 import BankBalanceBlock from '@/components/dashboard/BankBalanceBlock';
 import BankTransactionsBlock from '@/components/dashboard/BankTransactionsBlock';
+import NextMonthProjectionBlock from '@/components/dashboard/NextMonthProjectionBlock';
 import BankSelector from '@/components/BankSelector';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -523,40 +524,31 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen p-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
             <div>
-              <h1 className="text-4xl font-light text-white tracking-tight">
-                Dashboard
-              </h1>
-              <p className="text-slate-400 mt-2">
-                {format(new Date(), 'EEEE, MMMM d, yyyy')}
-              </p>
+              <h1 className="text-4xl font-light text-white tracking-tight">Dashboard</h1>
+              <p className="text-slate-400 mt-2">{format(new Date(), 'EEEE, MMMM d, yyyy')}</p>
             </div>
           </div>
-
-          {/* Regular Dashboard Blocks */}
           <div className="grid grid-cols-12 gap-6">
             {blocks
               .filter(block => block.isVisible && block.blockType !== 'bank-balance' && block.blockType !== 'bank-transactions')
               .map((block) => (
-              <DraggableBlock
-                key={block.id}
-                id={block.id}
-                width={block.width}
-                editMode={editMode}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                isDragging={draggedBlock === block.id}
-              >
-                {renderBlock(block)}
-              </DraggableBlock>
-            ))}
+                <DraggableBlock
+                  key={block.id}
+                  id={block.id}
+                  width={block.width}
+                  editMode={editMode}
+                  onDragStart={handleDragStart}
+                  onDragEnd={handleDragEnd}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  isDragging={draggedBlock === block.id}
+                >
+                  {renderBlock(block)}
+                </DraggableBlock>
+              ))}
           </div>
-
-          {/* Bank Connection CTA */}
           <div className="mt-8">
             <Card className="bg-gradient-to-br from-slate-900 to-slate-800 border-teal-500/30">
               <CardContent className="p-8 text-center">
@@ -571,9 +563,7 @@ export default function Dashboard() {
                   <Plus className="h-4 w-4 mr-2" />
                   Connect Bank Account
                 </Button>
-                <p className="text-xs text-slate-500 mt-4">
-                  Powered by TrueLayer. Your data is secure.
-                </p>
+                <p className="text-xs text-slate-500 mt-4">Powered by TrueLayer. Your data is secure.</p>
               </CardContent>
             </Card>
           </div>
@@ -591,8 +581,9 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen flex">
+      {/* ── Main content ── */}
+      <div className="flex-1 min-w-0 p-8 overflow-hidden">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
@@ -739,6 +730,18 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* ── Vertical Divider ── */}
+      <div className="w-px bg-gradient-to-b from-transparent via-white/10 to-transparent flex-shrink-0 self-stretch" />
+
+      {/* ── Right Sidebar ── */}
+      <div className="w-80 flex-shrink-0 p-6 overflow-y-auto sticky top-0 h-screen">
+        <NextMonthProjectionBlock
+          recurringTransactions={recurringTransactions}
+          bankTransactions={bankTransactions}
+          currency={currency}
+        />
       </div>
     </div>
   );
