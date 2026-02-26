@@ -201,7 +201,8 @@ export default function Bank() {
             <Button
               onClick={handleConnectBank}
               disabled={isLoading}
-              className="bg-teal-600 hover:bg-teal-700"
+              variant="outline"
+              className="glass-card border-white/10 text-slate-300 hover:text-white hover:border-teal-500/30 rounded-xl"
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />

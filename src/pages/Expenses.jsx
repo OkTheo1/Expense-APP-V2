@@ -355,6 +355,7 @@ export default function Expenses() {
               onClick={handleRecategorizeAll}
               disabled={isCategorizing || isRefreshing}
               variant="outline"
+              className="glass-card border-white/10 text-slate-300 hover:text-white hover:border-teal-500/30 rounded-xl"
               title="Re-run categorization on all transactions"
             >
               {isCategorizing ? (
@@ -368,18 +369,19 @@ export default function Expenses() {
               onClick={refreshData}
               disabled={isRefreshing}
               variant="outline"
+              className="glass-card border-white/10 text-slate-300 hover:text-white hover:border-teal-500/30 rounded-xl"
             >
               {isRefreshing ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Download className="h-4 w-4 mr-2" />
+                <RefreshCw className="h-4 w-4 mr-2" />
               )}
               Refresh
             </Button>
             <Button 
               variant="outline"
               onClick={exportToCSV}
-              className="rounded-full"
+              className="glass-card border-white/10 text-slate-300 hover:text-white hover:border-teal-500/30 rounded-xl"
             >
               <Download className="w-4 h-4 mr-2" />
               Export

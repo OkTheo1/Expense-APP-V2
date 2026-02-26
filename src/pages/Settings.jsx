@@ -50,7 +50,8 @@ export default function Settings() {
             <p className="text-slate-400 text-sm mb-4">Import transactions from a CSV file exported from your bank.</p>
             <Button
               onClick={() => setCsvImportOpen(true)}
-              className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white shadow-lg shadow-teal-500/20 rounded-xl w-full"
+              variant="outline"
+              className="glass-card border-white/10 text-slate-300 hover:text-white hover:border-teal-500/30 rounded-xl w-full"
             >
               <Upload className="w-4 h-4 mr-2" />
               Import Transactions

@@ -206,7 +206,8 @@ export default function Goals() {
           </div>
           <Button 
             onClick={() => openDialog()}
-            className="mt-4 sm:mt-0 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white shadow-lg shadow-teal-500/30 rounded-xl px-6"
+          variant="outline"
+          className="mt-4 sm:mt-0 glass-card border-white/10 text-slate-300 hover:text-white hover:border-teal-500/30 rounded-xl"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Goal
@@ -391,7 +392,8 @@ export default function Goals() {
             </p>
             <Button 
               onClick={() => openDialog()}
-              className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white"
+              variant="outline"
+              className="glass-card border-white/10 text-slate-300 hover:text-white hover:border-teal-500/30 rounded-xl"
             >
               <Plus className="w-4 h-4 mr-2" />
               Create First Goal
@@ -490,7 +492,8 @@ export default function Goals() {
               <Button 
                 onClick={handleSave}
                 disabled={!formData.name || !formData.targetAmount || !formData.targetDate}
-                className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white"
+                variant="outline"
+                className="glass-card border-white/10 text-slate-200 hover:text-white hover:border-teal-500/30"
               >
                 Save
               </Button>
@@ -548,7 +551,8 @@ export default function Goals() {
               <Button 
                 onClick={handleContribute}
                 disabled={!contributeAmount || parseFloat(contributeAmount) <= 0}
-                className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white"
+                variant="outline"
+                className="glass-card border-white/10 text-slate-200 hover:text-white hover:border-teal-500/30"
               >
                 Add Contribution
               </Button>

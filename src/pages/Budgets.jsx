@@ -233,7 +233,8 @@ export default function Budgets() {
             <Button
               onClick={() => openDialog()}
               disabled={availableCategories.length === 0}
-              className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white shadow-lg shadow-teal-500/30 rounded-xl px-6"
+              variant="outline"
+              className="glass-card border-white/10 text-slate-300 hover:text-white hover:border-teal-500/30 rounded-xl"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Budget
@@ -421,7 +422,8 @@ export default function Budgets() {
             </p>
             <Button
               onClick={() => openDialog()}
-              className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white shadow-lg shadow-teal-500/30 rounded-xl px-6"
+              variant="outline"
+              className="glass-card border-white/10 text-slate-300 hover:text-white hover:border-teal-500/30 rounded-xl"
             >
               <Plus className="w-4 h-4 mr-2" />
               Create Your First Budget
@@ -488,7 +490,8 @@ export default function Budgets() {
               <Button
                 onClick={handleSave}
                 disabled={saving || !formData.limit || (!editingBudget && !formData.category)}
-                className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white"
+                variant="outline"
+                className="glass-card border-white/10 text-slate-200 hover:text-white hover:border-teal-500/30"
               >
                 Save
               </Button>
