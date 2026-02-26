@@ -48,8 +48,17 @@ export default function NextMonthProjectionBlock({ recurringTransactions = [], b
       const start = startOfMonth(subMonths(now, i)).toISOString().split('T')[0];
       const end = endOfMonth(subMonths(now, i)).toISOString().split('T')[0];
       const monthTxs = bankTransactions.filter(tx => tx.date >= start && tx.date <= end);
+      // Helper: identify Lloyds→Monzo internal transfers (QTRLG) to exclude from variable expenses
+      const isQtrlgTransfer = (tx) => {
+        const desc = (tx.description || tx.merchant || '').toLowerCase();
+        return desc.includes('qtrlg');
+      };
+
       const inc = monthTxs.filter(tx => tx.amount > 0).reduce((s, tx) => s + tx.amount, 0);
-      const exp = monthTxs.filter(tx => tx.amount < 0).reduce((s, tx) => s + Math.abs(tx.amount), 0);
+      // Exclude QTRLG transfers (Lloyds→Monzo) — these are internal transfers, not real expenses
+      const exp = monthTxs
+        .filter(tx => tx.amount < 0 && !isQtrlgTransfer(tx))
+        .reduce((s, tx) => s + Math.abs(tx.amount), 0);
       const fuel = monthTxs
         .filter(tx => tx.amount < 0 && tx.category === 'Fuel')
         .reduce((s, tx) => s + Math.abs(tx.amount), 0);
