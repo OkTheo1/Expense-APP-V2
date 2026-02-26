@@ -231,6 +231,18 @@ export default function Bank() {
           Back to Dashboard
         </Link>
 
+        {/* Credit Card Support Note */}
+        <div className="mb-4 flex items-start gap-3 rounded-lg border border-blue-500/20 bg-blue-500/5 p-3">
+          <span className="text-blue-400 text-sm shrink-0 mt-0.5">ℹ️</span>
+          <p className="text-slate-400 text-xs leading-relaxed">
+            <span className="text-slate-300 font-medium">Credit card support is limited.</span>{' '}
+            TrueLayer supports some cards (Barclaycard, Amex UK, Capital One, MBNA) via Open Banking, but most credit cards are not available.
+            For unsupported cards, use{' '}
+            <a href="/Settings" className="text-teal-400 hover:text-teal-300 underline">CSV Import</a>{' '}
+            in Settings to import your statement manually.
+          </p>
+        </div>
+
         {/* SCA Expired Banner */}
         {scaExpired && (
           <div className="mb-6 flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4">
