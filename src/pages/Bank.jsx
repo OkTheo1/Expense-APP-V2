@@ -139,6 +139,81 @@ export default function Bank() {
     setEditCustomName('');
   };
 
+  const handlePdfUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file || file.type !== 'application/pdf') {
+      toast.error('Please select a valid PDF file');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Create form data
+      const formData = new FormData();
+      formData.append('pdfFile', file);
+
+      // Upload to server
+      const response = await fetch('http://localhost:3001/api/import/barclaycard-pdf', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Store the account and transactions in local storage
+      const existingAccounts = getBankAccounts() || [];
+      
+      // Check if account already exists
+      const accountExists = existingAccounts.some(acc => 
+        acc.account_id === data.account.account_id
+      );
+      
+      if (!accountExists) {
+        // Add the new account
+        localStorage.setItem('bank_accounts', JSON.stringify([...existingAccounts, data.account]));
+      } else {
+        // Update the existing account
+        const updatedAccounts = existingAccounts.map(acc => 
+          acc.account_id === data.account.account_id ? data.account : acc
+        );
+        localStorage.setItem('bank_accounts', JSON.stringify(updatedAccounts));
+      }
+      
+      // Store transactions
+      const existingTransactions = JSON.parse(localStorage.getItem('bank_transactions') || '[]');
+      
+      // Filter out existing transactions from this account
+      const otherTransactions = existingTransactions.filter(tx => 
+        tx.accountId !== data.account.account_id
+      );
+      
+      // Add new transactions
+      localStorage.setItem('bank_transactions', JSON.stringify([
+        ...otherTransactions,
+        ...data.transactions
+      ]));
+      
+      // Reload accounts
+      const updatedAccounts = getBankAccounts();
+      setAccounts(updatedAccounts);
+      setIsConnected(true);
+      
+      toast.success(`Imported Barclaycard statement with ${data.transactions.length} transactions`);
+      
+      // Reset file input
+      event.target.value = '';
+    } catch (error) {
+      console.error('Error uploading PDF:', error);
+      toast.error('Failed to process PDF file');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleRemoveBank = async () => {
     if (!bankToRemove) return;
     
@@ -238,10 +313,26 @@ export default function Bank() {
             <span className="text-slate-300 font-medium">Credit card support is limited.</span>{' '}
             TrueLayer supports some cards (Barclaycard, Amex UK, Capital One, MBNA) via Open Banking, but most credit cards are not available.
             For unsupported cards, use{' '}
+            <button 
+              onClick={() => document.getElementById('barclaycard-pdf-upload').click()} 
+              className="text-teal-400 hover:text-teal-300 underline"
+            >
+              Barclaycard PDF Import
+            </button>{' '}
+            or{' '}
             <a href="/Settings" className="text-teal-400 hover:text-teal-300 underline">CSV Import</a>{' '}
-            in Settings to import your statement manually.
+            in Settings.
           </p>
         </div>
+
+        {/* Hidden PDF Upload Input */}
+        <input 
+          type="file" 
+          id="barclaycard-pdf-upload" 
+          accept=".pdf" 
+          className="hidden" 
+          onChange={handlePdfUpload} 
+        />
 
         {/* SCA Expired Banner */}
         {scaExpired && (

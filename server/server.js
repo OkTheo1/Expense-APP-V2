@@ -5,6 +5,8 @@ import axios from 'axios';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import multer from 'multer';
+import * as pdfParse from 'pdf-parse';
 
 // Load environment variables
 dotenv.config();
@@ -21,6 +23,12 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+
+// Set up multer for file uploads
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+});
 
 // File-based persistence for bank connections
 const CONNECTIONS_FILE = path.join(__dirname, 'bankConnections.json');
@@ -624,6 +632,135 @@ app.post('/auth/truelayer/disconnect/:connectionId', (req, res) => {
   }
 });
 
+// Barclaycard PDF Import Endpoint
+app.post('/api/import/barclaycard-pdf', upload.single('pdfFile'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No PDF file uploaded' });
+    }
+
+    console.log('=== Processing Barclaycard PDF ===');
+    
+    // Parse the PDF
+    const pdfData = await pdfParse(req.file.buffer);
+    const pdfText = pdfData.text;
+    
+    // Extract account details
+    const accountNumberMatch = pdfText.match(/Number\s+(\d{4}\s+\d{4}\s+\d{4}\s+\d{4})/);
+    const accountNumber = accountNumberMatch ? accountNumberMatch[1].replace(/\s+/g, '') : null;
+    
+    const balanceMatch = pdfText.match(/Your new balance:\s+£([\d,.]+)/);
+    const balance = balanceMatch ? parseFloat(balanceMatch[1].replace(/,/g, '')) : 0;
+    
+    const availableMatch = pdfText.match(/Available to spend:\s+£([\d,.]+)/);
+    const available = availableMatch ? parseFloat(availableMatch[1].replace(/,/g, '')) : 0;
+    
+    const creditLimitMatch = pdfText.match(/Your current credit limit:\s+£([\d,.]+)/);
+    const creditLimit = creditLimitMatch ? parseFloat(creditLimitMatch[1].replace(/,/g, '')) : 0;
+    
+    // Extract transactions
+    const transactions = [];
+    
+    // Define regex patterns for different transaction types
+    const transactionRegex = /(\d{2}\s+[A-Za-z]{3})([^£]+)£([\d,.]+)(?:\s*CR)?/g;
+    
+    let match;
+    while ((match = transactionRegex.exec(pdfText)) !== null) {
+      const dateStr = match[1].trim();
+      const description = match[2].trim();
+      const amountStr = match[3].trim();
+      const isCredit = match[0].includes('CR');
+      
+      // Parse date (assuming current year)
+      const currentYear = new Date().getFullYear();
+      const dateParts = dateStr.split(' ');
+      const day = parseInt(dateParts[0]);
+      const monthAbbr = dateParts[1];
+      
+      // Convert month abbreviation to month number
+      const months = {
+        'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+        'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+      };
+      
+      const month = months[monthAbbr];
+      const date = new Date(currentYear, month, day);
+      
+      // Parse amount
+      const amount = parseFloat(amountStr.replace(/,/g, ''));
+      
+      // Determine transaction type and category
+      let category = 'Uncategorized';
+      let type = 'expense';
+      
+      if (description.includes('Payment') && description.includes('Thank You')) {
+        type = 'transfer';
+        category = 'Credit Card Payment';
+      } else if (isCredit) {
+        type = 'income';
+        category = 'Refund';
+      } else {
+        // Categorize expenses
+        if (description.includes('Shell') || description.includes('Service Stati')) {
+          category = 'Fuel';
+        } else if (description.includes('Temu')) {
+          category = 'Shopping';
+        } else if (description.includes('Costa') || description.includes('Coffee')) {
+          category = 'Food & Dining';
+        }
+      }
+      
+      transactions.push({
+        id: `barclaycard_${date.getTime()}_${Math.floor(Math.random() * 1000)}`,
+        date: date.toISOString(),
+        description: description,
+        amount: isCredit ? amount : -amount, // Credits are positive, debits are negative
+        currency: 'GBP',
+        merchant: description.split(',')[0].trim(),
+        accountId: `barclaycard_${accountNumber}`,
+        accountName: 'Barclaycard Platinum Visa',
+        providerId: 'barclaycard',
+        providerName: 'Barclaycard',
+        category: category,
+        type: type
+      });
+    }
+    
+    // Create account object
+    const account = {
+      account_id: `barclaycard_${accountNumber}`,
+      account_type: 'CREDIT_CARD',
+      display_name: 'Barclaycard Platinum Visa',
+      currency: 'GBP',
+      account_number: {
+        number: accountNumber ? accountNumber.slice(-4) : '8005'
+      },
+      provider: {
+        display_name: 'Barclaycard',
+        provider_id: 'barclaycard',
+        logo_uri: ''
+      },
+      balance: {
+        available: available,
+        current: -balance, // Negative because it's owed
+        currency: 'GBP',
+        credit_limit: creditLimit
+      }
+    };
+    
+    console.log(`Extracted ${transactions.length} transactions from Barclaycard statement`);
+    
+    res.json({
+      account: account,
+      transactions: transactions
+    });
+    
+  } catch (error) {
+    console.error('Error processing PDF:', error);
+    res.status(500).json({ error: 'Failed to process PDF file' });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`\n=== Server Running ===`);
@@ -637,5 +774,6 @@ app.listen(PORT, () => {
   console.log(`  - GET  /api/transactions`);
   console.log(`  - POST /auth/truelayer/refresh`);
   console.log(`  - POST /auth/truelayer/disconnect`);
+  console.log(`  - POST /api/import/barclaycard-pdf`);
   console.log(`======================\n`);
 });
