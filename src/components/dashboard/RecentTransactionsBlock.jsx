@@ -45,7 +45,7 @@ export default function RecentTransactionsBlock({ transactions, currency }) {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-white group-hover:text-teal-400 transition-colors">
-                      {transaction.title}
+                      {transaction.description || transaction.title || 'Unknown'}
                     </p>
                     <p className="text-xs text-slate-400">
                       {transaction.category} • {format(new Date(transaction.date), 'MMM d')}
