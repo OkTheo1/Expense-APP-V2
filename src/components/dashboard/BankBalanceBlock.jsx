@@ -163,7 +163,12 @@ export default function BankBalanceBlock({ currency = 'GBP', accounts: propAccou
 
       <div className="mb-6">
         <p className="text-slate-400 text-sm mb-1">Total Balance</p>
-        <p className="text-3xl font-semibold text-white">{formatCurrency(balance)}</p>
+        <div className="flex items-baseline gap-3 flex-wrap">
+          <p className="text-3xl font-semibold text-white">{formatCurrency(balance)}</p>
+          <p className="text-lg font-medium text-green-400">
+            {formatCurrency(accounts.reduce((sum, acc) => sum + (acc.balance?.available ?? acc.balance?.current ?? 0), 0))} available
+          </p>
+        </div>
       </div>
 
       <div className="space-y-3">
