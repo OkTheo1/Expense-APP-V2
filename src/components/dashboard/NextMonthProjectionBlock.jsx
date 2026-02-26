@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { TrendingUp, TrendingDown, Sparkles, Repeat, BarChart2, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Sparkles, Repeat, BarChart2, ArrowUpRight, ArrowDownRight, Fuel } from 'lucide-react';
 import { format, addMonths, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 
 const FREQUENCY_MULTIPLIERS = {
@@ -37,28 +37,33 @@ export default function NextMonthProjectionBlock({ recurringTransactions = [], b
   const totalRecurringIncome = recurringIncomeItems.reduce((s, r) => s + r.monthlyAmount, 0);
   const totalRecurringExpenses = recurringExpenseItems.reduce((s, r) => s + r.monthlyAmount, 0);
 
-  // Average monthly bank income & expenses over last 3 months
-  const { avgBankIncome, avgBankExpenses } = useMemo(() => {
+  // Recurring-only net (no variable/bank data)
+  const recurringNet = totalRecurringIncome - totalRecurringExpenses;
+
+  // Average monthly bank income, expenses, and fuel over last 3 months
+  const { avgBankIncome, avgBankExpenses, avgFuelExpenses } = useMemo(() => {
     const now = new Date();
-    let incomeTotal = 0, expenseTotal = 0, months = 0;
+    let incomeTotal = 0, expenseTotal = 0, fuelTotal = 0, months = 0;
     for (let i = 1; i <= 3; i++) {
       const start = startOfMonth(subMonths(now, i)).toISOString().split('T')[0];
       const end = endOfMonth(subMonths(now, i)).toISOString().split('T')[0];
-      const inc = bankTransactions
-        .filter(tx => tx.date >= start && tx.date <= end && tx.amount > 0)
-        .reduce((s, tx) => s + tx.amount, 0);
-      const exp = bankTransactions
-        .filter(tx => tx.date >= start && tx.date <= end && tx.amount < 0)
+      const monthTxs = bankTransactions.filter(tx => tx.date >= start && tx.date <= end);
+      const inc = monthTxs.filter(tx => tx.amount > 0).reduce((s, tx) => s + tx.amount, 0);
+      const exp = monthTxs.filter(tx => tx.amount < 0).reduce((s, tx) => s + Math.abs(tx.amount), 0);
+      const fuel = monthTxs
+        .filter(tx => tx.amount < 0 && tx.category === 'Fuel')
         .reduce((s, tx) => s + Math.abs(tx.amount), 0);
       if (inc > 0 || exp > 0) {
         incomeTotal += inc;
         expenseTotal += exp;
+        fuelTotal += fuel;
         months++;
       }
     }
     return {
       avgBankIncome: months > 0 ? incomeTotal / months : 0,
       avgBankExpenses: months > 0 ? expenseTotal / months : 0,
+      avgFuelExpenses: months > 0 ? fuelTotal / months : 0,
     };
   }, [bankTransactions]);
 
@@ -66,10 +71,14 @@ export default function NextMonthProjectionBlock({ recurringTransactions = [], b
   const projectedIncome = totalRecurringIncome > 0 ? totalRecurringIncome : avgBankIncome;
 
   // Projected variable expenses = avg bank expenses minus recurring (to avoid double-counting)
-  const variableExpenses = Math.max(0, avgBankExpenses - totalRecurringExpenses);
+  const rawVariableExpenses = Math.max(0, avgBankExpenses - totalRecurringExpenses);
+
+  // Fuel is broken out from variable; other variable = remainder
+  const fuelExpenses = avgFuelExpenses;
+  const otherVariableExpenses = Math.max(0, rawVariableExpenses - fuelExpenses);
 
   // Total projected expenses
-  const projectedExpenses = totalRecurringExpenses + variableExpenses;
+  const projectedExpenses = totalRecurringExpenses + rawVariableExpenses;
 
   const netBalance = projectedIncome - projectedExpenses;
   const savingsRate = projectedIncome > 0 ? (netBalance / projectedIncome) * 100 : 0;
@@ -126,8 +135,21 @@ export default function NextMonthProjectionBlock({ recurringTransactions = [], b
                   : `${Math.abs(savingsRate).toFixed(0)}% over budget`}
               </p>
 
+              {/* Recurring-only net */}
+              {(totalRecurringIncome > 0 || totalRecurringExpenses > 0) && (
+                <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <Repeat className="h-3 w-3 text-slate-500" />
+                    <span className="text-xs text-slate-500">Recurring only</span>
+                  </div>
+                  <span className={`text-xs font-semibold ${recurringNet >= 0 ? 'text-teal-400' : 'text-orange-400'}`}>
+                    {recurringNet < 0 ? '-' : '+'}{symbol}{Math.abs(recurringNet).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+              )}
+
               {/* Income vs Expense bar */}
-              <div className="mt-4 space-y-1.5">
+              <div className="mt-3 space-y-1.5">
                 <div className="flex justify-between text-xs text-slate-500">
                   <span>Expenses</span>
                   <span>{expenseRatio.toFixed(0)}% of income</span>
@@ -214,13 +236,22 @@ export default function NextMonthProjectionBlock({ recurringTransactions = [], b
               {recurringExpenseItems.length > 4 && (
                 <p className="text-xs text-slate-600">+{recurringExpenseItems.length - 4} more</p>
               )}
-              {variableExpenses > 0 && (
+              {fuelExpenses > 0 && (
+                <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                  <div className="flex items-center gap-1.5">
+                    <Fuel className="h-3 w-3 text-amber-500" />
+                    <span className="text-xs text-amber-400/80">Fuel (variable, 3mo avg)</span>
+                  </div>
+                  <span className="text-xs text-amber-400/80">{symbol}{fuelExpenses.toFixed(2)}</span>
+                </div>
+              )}
+              {otherVariableExpenses > 0 && (
                 <div className="flex items-center justify-between pt-1 border-t border-white/5">
                   <div className="flex items-center gap-1.5">
                     <BarChart2 className="h-3 w-3 text-slate-600" />
-                    <span className="text-xs text-slate-500">Variable (3mo avg)</span>
+                    <span className="text-xs text-slate-500">Other variable (3mo avg)</span>
                   </div>
-                  <span className="text-xs text-slate-400">{symbol}{variableExpenses.toFixed(2)}</span>
+                  <span className="text-xs text-slate-400">{symbol}{otherVariableExpenses.toFixed(2)}</span>
                 </div>
               )}
             </div>

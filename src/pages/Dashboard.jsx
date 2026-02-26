@@ -43,7 +43,8 @@ import {
   saveAccountNameMapping,
   getAccountCustomName,
   getAccountDisplayName,
-  getAccountTypeName
+  getAccountTypeName,
+  recategorizeAll
 } from '@/lib/bankData';
 
 const API_BASE = 'http://localhost:3001';
@@ -51,6 +52,7 @@ const API_BASE = 'http://localhost:3001';
 const CATEGORY_ICONS = {
   'Food & Dining': '🍔',
   'Transportation': '🚗',
+  'Fuel': '⛽',
   'Housing': '🏠',
   'Shopping': '🛍️',
   'Entertainment': '🎬',
@@ -98,6 +100,9 @@ export default function Dashboard() {
       const status = await checkBankConnection();
       setIsBankConnected(status.connected);
       
+      // Re-categorize stored transactions with latest rules (picks up new Fuel category)
+      recategorizeAll();
+
       const accounts = getBankAccounts();
       const transactions = getBankTransactions();
       setBankAccounts(accounts);

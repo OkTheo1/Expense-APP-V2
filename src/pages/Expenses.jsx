@@ -24,6 +24,7 @@ import {
 const CATEGORY_ICONS = {
   'Food & Dining': '🍽️',
   'Transportation': '🚗',
+  'Fuel': '⛽',
   'Housing': '🏠',
   'Shopping': '🛍️',
   'Entertainment': '🎬',
@@ -40,6 +41,7 @@ const CATEGORY_ICONS = {
 const ALL_CATEGORIES = [
   'Food & Dining',
   'Transportation',
+  'Fuel',
   'Housing',
   'Shopping',
   'Entertainment',

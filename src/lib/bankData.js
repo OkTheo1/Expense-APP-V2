@@ -68,11 +68,17 @@ const DEFAULT_CATEGORY_RULES = {
     'co-op food', 'co op food', 'whole foods', 'leon', 'pret', 'five guys', 'shake shack',
     'wetherspoons', 'spoons', 'gopuff', 'getir', 'gorillas', 'papa john', 'pizza hut'
   ],
+  'Fuel': [
+    'bp', 'shell', 'esso', 'texaco', 'petrol', 'fuel', 'morrisons fuel', 'tesco fuel', 'asda fuel',
+    'bp pulse', 'pod point', 'ev charging', 'electric charging',
+    'gulf', 'total energies', 'applegreen', 'certas', 'harvest energy',
+    'jet petrol', 'murco', 'pace petroleum'
+  ],
   'Transportation': [
-    'uber', 'lyft', 'taxi', 'train', 'rail', 'bus', 'tube', 'metro', 'petrol', 'fuel', 'shell', 'bp', 'esso', 'texaco', 'morrisons fuel',
+    'uber', 'lyft', 'taxi', 'train', 'rail', 'bus', 'tube', 'metro',
     'parking', 'car park', 'dvla', 'vehicle', 'tfl', 'transport for london', 'southwestern rail', 'great western',
     'virgin train', 'crosscountry', 'east midlands', 'northern rail', 'arriva', 'first bus', 'stagecoach', 'national express',
-    'uber trip', 'bolt', 'kapten', 'electric charging', 'ev charging', 'bp pulse', 'pod point',
+    'uber trip', 'bolt', 'kapten',
     // Added from real transaction data
     'easyjet', 'lner', 'parkvia',
     'ryanair', 'british airways', 'wizz air', 'jet2', 'eurostar', 'trainline', 'national rail',
