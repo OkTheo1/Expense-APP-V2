@@ -1,36 +1,25 @@
-# TODO - Auto-Categorise Uncategorised Transactions
+# UI Redesign - "2026 Feel" - Match Forecast Sidebar Style ✅ COMPLETE
 
-## Steps
+## Design System Applied
+- Dark slate backgrounds (no bg-white/bg-slate-50)
+- Gradient hero cards with glow blobs
+- Colored gradient borders (border-color/20)
+- Icon badges with gradient backgrounds (h-10 w-10 rounded-xl bg-gradient-to-br from-color/20)
+- Progress bars with color coding + glow
+- Uppercase tracking-wider labels (text-xs text-slate-500 uppercase tracking-widest)
+- Bold large numbers (text-3xl font-bold tracking-tight)
+- glass-card / bg-slate-900/50 border border-slate-800 rounded-2xl
 
-- [x] 1. Add `recategorizeUncategorized()` to `src/lib/bankData.js`
-- [x] 2. Add `recategorizeAll()` to `src/lib/bankData.js`
-- [x] 3. Add `updateTransactionCategory()` to `src/lib/bankData.js`
-- [x] 4. Update `src/pages/Expenses.jsx` — auto-categorize banner + inline category editing
-- [x] 5. Git commit
+## Pages Completed
 
----
-
-# Previous TODO - Bank-Focused Website Remodel
-
-## Phase 1: Core Components
-- [ ] Create BankSelector component (reusable dropdown for bank/account filtering)
-- [ ] Add bank data hooks for easy access throughout the app
-
-## Phase 2: Dashboard Updates
-- [ ] Add bank/account filter dropdown to Dashboard
-- [ ] Make dashboard blocks filterable by selected bank
-- [ ] Show "All Banks" aggregate option
-- [ ] Reorganize blocks for better bank-focused UX
-
-## Phase 3: Page Updates
-- [ ] Update Recurring Transactions page with bank association
-- [ ] Update Goals page with bank linking
-- [ ] Update Debt page with bank linking
-- [ ] Update Transactions page with bank filtering
-- [ ] Update Analytics page with bank filtering
-- [ ] Update Budgets page with bank filtering
-
-## Phase 4: UI/UX Improvements
-- [ ] Add account type icons throughout
-- [ ] Update sidebar styling if needed
-- [ ] Test all bank filtering functionality
+- [x] Dashboard.jsx - Forecast sidebar added, flex layout with right sidebar
+- [x] Budgets.jsx - Complete redesign: dark bg, gradient cards, glow effects, colored progress bars
+- [x] Expenses.jsx - Gradient stat cards, rounded-2xl transaction rows, fixed loading bg
+- [x] Analytics.jsx - Gradient stat cards, fixed chart colors (teal bar, vibrant pie)
+- [x] Calendar.jsx - Gradient stat cards, fixed loading bg
+- [x] Settings.jsx - Gradient icon badges, improved layout with dividers
+- [x] Bank.jsx - Gradient account cards, gradient stat cards with glow
+- [x] Goals.jsx - Already had glass-card + gradients ✅
+- [x] Debt.jsx - Already had glass-card + gradients ✅
+- [x] NetWorth.jsx - Already had glass-card + gradients ✅
+- [x] RecurringTransactions.jsx - Already had glass-card + gradients ✅

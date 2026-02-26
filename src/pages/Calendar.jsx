@@ -262,7 +262,7 @@ export default function CalendarPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-slate-400">Loading...</div>
       </div>
     );
@@ -334,49 +334,44 @@ export default function CalendarPage() {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          <Card className="bg-slate-900/50 border-slate-800">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-green-400 mb-1">
-                <TrendingUp className="w-4 h-4" />
-                <span className="text-sm font-medium">Income</span>
+          <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-transparent border border-emerald-500/20 rounded-2xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-lg bg-emerald-500/20 flex items-center justify-center border border-emerald-500/20">
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
               </div>
-              <p className="text-xl font-bold text-green-400">
-                {formatAmount(monthStats.income)}
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-900/50 border-slate-800">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-red-400 mb-1">
-                <TrendingDown className="w-4 h-4" />
-                <span className="text-sm font-medium">Expenses</span>
+              <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Income</p>
+            </div>
+            <p className="text-xl font-bold text-emerald-400">{formatAmount(monthStats.income)}</p>
+          </div>
+          <div className="relative overflow-hidden bg-gradient-to-br from-red-500/10 via-rose-500/5 to-transparent border border-red-500/20 rounded-2xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-lg bg-red-500/20 flex items-center justify-center border border-red-500/20">
+                <TrendingDown className="w-3.5 h-3.5 text-red-400" />
               </div>
-              <p className="text-xl font-bold text-red-400">
-                {formatAmount(monthStats.expenses)}
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-900/50 border-slate-800">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-teal-400 mb-1">
-                <CalendarIcon className="w-4 h-4" />
-                <span className="text-sm font-medium">Net</span>
+              <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Expenses</p>
+            </div>
+            <p className="text-xl font-bold text-red-400">{formatAmount(monthStats.expenses)}</p>
+          </div>
+          <div className={`relative overflow-hidden rounded-2xl p-4 border ${monthStats.net >= 0 ? 'bg-gradient-to-br from-teal-500/10 to-transparent border-teal-500/20' : 'bg-gradient-to-br from-red-500/10 to-transparent border-red-500/20'}`}>
+            <div className="flex items-center gap-2 mb-2">
+              <div className={`h-8 w-8 rounded-lg flex items-center justify-center border ${monthStats.net >= 0 ? 'bg-teal-500/20 border-teal-500/20' : 'bg-red-500/20 border-red-500/20'}`}>
+                <CalendarIcon className={`w-3.5 h-3.5 ${monthStats.net >= 0 ? 'text-teal-400' : 'text-red-400'}`} />
               </div>
-              <p className={`text-xl font-bold ${monthStats.net >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                {monthStats.net >= 0 ? '+' : ''}{formatAmount(monthStats.net)}
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-900/50 border-slate-800">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-slate-400 mb-1">
-                <span className="text-sm font-medium">Transactions</span>
+              <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Net</p>
+            </div>
+            <p className={`text-xl font-bold ${monthStats.net >= 0 ? 'text-teal-400' : 'text-red-400'}`}>
+              {monthStats.net >= 0 ? '+' : ''}{formatAmount(monthStats.net)}
+            </p>
+          </div>
+          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-lg bg-slate-700/50 flex items-center justify-center border border-slate-700/50">
+                <CalendarIcon className="w-3.5 h-3.5 text-slate-400" />
               </div>
-              <p className="text-xl font-bold text-white">
-                {monthStats.transactionCount}
-              </p>
-            </CardContent>
-          </Card>
+              <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Transactions</p>
+            </div>
+            <p className="text-xl font-bold text-white">{monthStats.transactionCount}</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

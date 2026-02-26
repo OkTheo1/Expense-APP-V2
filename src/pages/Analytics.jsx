@@ -17,7 +17,7 @@ import {
   getMonthlyTrends 
 } from '@/lib/bankData';
 
-const COLORS = ['#0f172a', '#334155', '#64748b', '#94a3b8', '#cbd5e1', '#059669', '#0891b2', '#7c3aed', '#db2777', '#f59e0b', '#84cc16'];
+const COLORS = ['#14b8a6', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#f97316', '#06b6d4', '#a855f7', '#ef4444', '#84cc16'];
 
 const CATEGORY_ICONS = {
   'Housing': '🏠',
@@ -252,55 +252,57 @@ export default function Analytics() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-slate-900/50 border-slate-800">
-            <CardContent className="p-6">
-              <p className="text-sm text-slate-400">Manual Expenses</p>
-              <p className="text-2xl font-light text-white mt-1">
-                {symbol}{totalSpending.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-              </p>
-              <p className="text-xs text-slate-500 mt-2">Last {months} months</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-900/50 border-slate-800">
-            <CardContent className="p-6">
-              <p className="text-sm text-slate-400">Bank Expenses</p>
-              <p className="text-2xl font-light text-red-400 mt-1">
-                {symbol}{bankTotalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-              </p>
-              <p className="text-xs text-slate-500 mt-2">{filteredBankTransactions.length} transactions</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-900/50 border-slate-800">
-            <CardContent className="p-6">
-              <p className="text-sm text-slate-400">Avg Bank Transaction</p>
-              <p className="text-2xl font-light text-white mt-1">
-                {symbol}{avgBankTransaction.toFixed(2)}
-              </p>
-              <p className="text-xs text-slate-500 mt-2">per transaction</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-900/50 border-slate-800">
-            <CardContent className="p-6">
-              <p className="text-sm text-slate-400">vs Last Month</p>
-              <div className="flex items-center gap-2 mt-1">
-                <p className={`text-2xl font-light ${
-                  monthChange > 0 ? 'text-red-400' : monthChange < 0 ? 'text-green-400' : 'text-white'
-                }`}>
-                  {monthChange > 0 ? '+' : ''}{monthChange.toFixed(1)}%
-                </p>
-                {monthChange > 0 ? (
-                  <TrendingUp className="w-5 h-5 text-red-400" />
-                ) : monthChange < 0 ? (
-                  <TrendingDown className="w-5 h-5 text-green-400" />
-                ) : (
-                  <Minus className="w-5 h-5 text-slate-400" />
-                )}
+          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-slate-500/20 to-slate-600/20 flex items-center justify-center border border-slate-500/20">
+                <Minus className="w-4 h-4 text-slate-400" />
               </div>
-              <p className="text-xs text-slate-500 mt-2">
-                {monthChange > 0 ? 'Spending increased' : monthChange < 0 ? 'Spending decreased' : 'No change'}
-              </p>
-            </CardContent>
-          </Card>
+              <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Manual Expenses</p>
+            </div>
+            <p className="text-2xl font-bold text-white">{symbol}{totalSpending.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+            <p className="text-xs text-slate-500 mt-1">Last {months} months</p>
+          </div>
+          <div className="relative overflow-hidden bg-gradient-to-br from-red-500/10 via-rose-500/5 to-transparent border border-red-500/20 rounded-2xl p-5">
+            <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full blur-2xl opacity-20 bg-red-400" />
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-red-500/20 flex items-center justify-center border border-red-500/20">
+                <TrendingDown className="w-4 h-4 text-red-400" />
+              </div>
+              <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Bank Expenses</p>
+            </div>
+            <p className="text-2xl font-bold text-red-400">{symbol}{bankTotalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+            <p className="text-xs text-slate-500 mt-1">{filteredBankTransactions.length} transactions</p>
+          </div>
+          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center border border-blue-500/20">
+                <Calendar className="w-4 h-4 text-blue-400" />
+              </div>
+              <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Avg Transaction</p>
+            </div>
+            <p className="text-2xl font-bold text-white">{symbol}{avgBankTransaction.toFixed(2)}</p>
+            <p className="text-xs text-slate-500 mt-1">per transaction</p>
+          </div>
+          <div className={`relative overflow-hidden rounded-2xl p-5 border ${
+            monthChange > 0
+              ? 'bg-gradient-to-br from-red-500/10 to-transparent border-red-500/20'
+              : monthChange < 0
+              ? 'bg-gradient-to-br from-emerald-500/10 to-transparent border-emerald-500/20'
+              : 'bg-slate-900/50 border-slate-800'
+          }`}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`h-9 w-9 rounded-xl flex items-center justify-center border ${
+                monthChange > 0 ? 'bg-red-500/20 border-red-500/20' : monthChange < 0 ? 'bg-emerald-500/20 border-emerald-500/20' : 'bg-slate-700/20 border-slate-700/20'
+              }`}>
+                {monthChange > 0 ? <TrendingUp className="w-4 h-4 text-red-400" /> : monthChange < 0 ? <TrendingDown className="w-4 h-4 text-emerald-400" /> : <Minus className="w-4 h-4 text-slate-400" />}
+              </div>
+              <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">vs Last Month</p>
+            </div>
+            <p className={`text-2xl font-bold ${monthChange > 0 ? 'text-red-400' : monthChange < 0 ? 'text-emerald-400' : 'text-white'}`}>
+              {monthChange > 0 ? '+' : ''}{monthChange.toFixed(1)}%
+            </p>
+            <p className="text-xs text-slate-500 mt-1">{monthChange > 0 ? 'Spending increased' : monthChange < 0 ? 'Spending decreased' : 'No change'}</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -450,7 +452,7 @@ export default function Analytics() {
                       }}
                       labelStyle={{ color: '#fff' }}
                     />
-                    <Bar dataKey="average" fill="#0f172a" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="average" fill="#14b8a6" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

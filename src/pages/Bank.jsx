@@ -295,27 +295,30 @@ export default function Bank() {
         {/* Connected Accounts Grouped by Bank */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {banks.map(bankName => (
-            <Card key={bankName} className="bg-slate-900/50 border-slate-800">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between text-white">
-                  <div className="flex items-center gap-3">
+            <div key={bankName} className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden">
+              <div className="flex items-center justify-between p-5 border-b border-slate-800/50">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-500/20 to-emerald-500/20 flex items-center justify-center border border-teal-500/20">
                     <Building2 className="h-5 w-5 text-teal-400" />
-                    {bankName}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setBankToRemove(bankName)}
-                    className="text-slate-400 hover:text-red-400 hover:bg-red-400/10"
-                    title="Remove bank"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
+                  <div>
+                    <p className="text-white font-semibold">{bankName}</p>
+                    <p className="text-xs text-slate-500">{groupedAccounts[bankName].length} account{groupedAccounts[bankName].length !== 1 ? 's' : ''}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setBankToRemove(bankName)}
+                  className="text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-xl"
+                  title="Remove bank"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="p-4 space-y-3">
                 {groupedAccounts[bankName].map((account, index) => (
-                  <div key={index} className="bg-slate-800/50 rounded-lg p-3">
+                  <div key={index} className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         {editingAccountId === account.account_id ? (
@@ -326,18 +329,18 @@ export default function Bank() {
                               placeholder="Enter custom name..."
                               className="bg-slate-700 border-slate-600 text-white text-sm h-8"
                             />
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               onClick={() => handleSaveAccountName(account.account_id)}
-                              className="h-8 bg-green-600 hover:bg-green-700"
+                              className="h-8 bg-emerald-600 hover:bg-emerald-700"
                             >
                               <Save className="h-3 w-3" />
                             </Button>
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
+                            <Button
+                              size="sm"
+                              variant="ghost"
                               onClick={handleCancelEdit}
-                              className="h-8"
+                              className="h-8 text-slate-400"
                             >
                               <X className="h-3 w-3" />
                             </Button>
@@ -349,51 +352,66 @@ export default function Bank() {
                             </p>
                             <button
                               onClick={() => handleEditAccountName(account)}
-                              className="text-slate-400 hover:text-white"
+                              className="text-slate-500 hover:text-teal-400 transition-colors"
                             >
                               <Edit2 className="h-3 w-3" />
                             </button>
                           </div>
                         )}
-                        <p className="text-slate-400 text-xs mt-1">
+                        <p className="text-slate-500 text-xs mt-1">
                           •••• {account.account_number?.account_particulars?.slice(-4) || account.account_id?.slice(-4) || '****'}
                         </p>
-                        {account.balance && (
-                          <p className="text-green-400 text-sm mt-1">
+                      </div>
+                      {account.balance && (
+                        <div className="text-right">
+                          <p className={`text-lg font-semibold ${(account.balance.current ?? account.balance.available ?? 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                             {formatAmount(account.balance.current ?? account.balance.available ?? 0)}
                           </p>
-                        )}
-                      </div>
+                          {account.balance.available !== undefined && account.balance.available !== account.balance.current && (
+                            <p className="text-xs text-slate-500">{formatAmount(account.balance.available)} available</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
 
         {/* Quick Stats */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="bg-slate-900/50 border-slate-800">
-            <CardContent className="p-6 text-center">
-              <p className="text-slate-400 text-sm">Connected Banks</p>
-              <p className="text-3xl font-semibold text-white mt-1">{banks.length}</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-900/50 border-slate-800">
-            <CardContent className="p-6 text-center">
-              <p className="text-slate-400 text-sm">Total Accounts</p>
-              <p className="text-3xl font-semibold text-white mt-1">{accounts.length}</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-900/50 border-slate-800">
-            <CardContent className="p-6 text-center">
-              <p className="text-slate-400 text-sm">Total Balance</p>
-              <p className="text-3xl font-semibold text-green-400 mt-1">
-                {formatAmount(accounts.reduce((sum, acc) => sum + (acc.balance?.available || acc.balance?.current || 0), 0))}
-              </p>
-            </CardContent>
-          </Card>
+          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-500/20 to-emerald-500/20 flex items-center justify-center border border-teal-500/20">
+                <Building2 className="h-5 w-5 text-teal-400" />
+              </div>
+              <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Connected Banks</p>
+            </div>
+            <p className="text-3xl font-bold text-white">{banks.length}</p>
+          </div>
+          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center border border-blue-500/20">
+                <Building2 className="h-5 w-5 text-blue-400" />
+              </div>
+              <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Total Accounts</p>
+            </div>
+            <p className="text-3xl font-bold text-white">{accounts.length}</p>
+          </div>
+          <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-transparent border border-emerald-500/20 rounded-2xl p-5">
+            <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full blur-2xl opacity-20 bg-emerald-400" />
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-10 w-10 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/20">
+                <RefreshCw className="h-5 w-5 text-emerald-400" />
+              </div>
+              <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Total Balance</p>
+            </div>
+            <p className="text-3xl font-bold text-emerald-400">
+              {formatAmount(accounts.reduce((sum, acc) => sum + (acc.balance?.available || acc.balance?.current || 0), 0))}
+            </p>
+          </div>
         </div>
       </div>
 

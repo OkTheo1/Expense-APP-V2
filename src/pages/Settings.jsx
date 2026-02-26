@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Palette, Database, Globe, Upload, FileSpreadsheet } from 'lucide-react';
+import { Palette, Database, Globe, Upload } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import CSVImportWizard from '@/components/CSVImportWizard';
 
@@ -9,62 +8,77 @@ export default function Settings() {
 
   return (
     <div className="min-h-screen p-8">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-light text-white tracking-tight mb-8">
-          Settings
-        </h1>
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-4xl font-light text-white tracking-tight mb-2">Settings</h1>
+        <p className="text-slate-400 mb-8">Manage your app preferences and data</p>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Appearance */}
-          <Card className="bg-slate-900/50 border-slate-800">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-white">
-                <Palette className="h-5 w-5 text-teal-400" />
-                Appearance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-400">Dark mode with mint/teal accents enabled</p>
-            </CardContent>
-          </Card>
+          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-teal-500/20 to-emerald-500/20 flex items-center justify-center border border-teal-500/20">
+                <Palette className="h-6 w-6 text-teal-400" />
+              </div>
+              <div>
+                <h3 className="text-white font-semibold">Appearance</h3>
+                <p className="text-xs text-slate-500">Theme & display settings</p>
+              </div>
+            </div>
+            <div className="h-px bg-white/5 mb-4" />
+            <div className="flex items-center justify-between">
+              <p className="text-slate-400 text-sm">Dark mode</p>
+              <span className="text-xs px-2.5 py-1 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 font-medium">Active</span>
+            </div>
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-slate-400 text-sm">Accent colour</p>
+              <span className="text-xs px-2.5 py-1 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 font-medium">Teal / Emerald</span>
+            </div>
+          </div>
 
           {/* Data & Backup */}
-          <Card className="bg-slate-900/50 border-slate-800">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-white">
-                <Database className="h-5 w-5 text-purple-400" />
-                Data & Backup
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-400 mb-4">Manage your data and backups</p>
-              <Button 
-                onClick={() => setCsvImportOpen(true)}
-                className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white"
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                Import Transactions
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center border border-purple-500/20">
+                <Database className="h-6 w-6 text-purple-400" />
+              </div>
+              <div>
+                <h3 className="text-white font-semibold">Data & Import</h3>
+                <p className="text-xs text-slate-500">Manage your transaction data</p>
+              </div>
+            </div>
+            <div className="h-px bg-white/5 mb-4" />
+            <p className="text-slate-400 text-sm mb-4">Import transactions from a CSV file exported from your bank.</p>
+            <Button
+              onClick={() => setCsvImportOpen(true)}
+              className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white shadow-lg shadow-teal-500/20 rounded-xl w-full"
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Import Transactions
+            </Button>
+          </div>
 
           {/* Currency */}
-          <Card className="bg-slate-900/50 border-slate-800">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-white">
-                <Globe className="h-5 w-5 text-blue-400" />
-                Currency
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-400">Default: GBP (£)</p>
-            </CardContent>
-          </Card>
+          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center border border-blue-500/20">
+                <Globe className="h-6 w-6 text-blue-400" />
+              </div>
+              <div>
+                <h3 className="text-white font-semibold">Currency & Region</h3>
+                <p className="text-xs text-slate-500">Localisation settings</p>
+              </div>
+            </div>
+            <div className="h-px bg-white/5 mb-4" />
+            <div className="flex items-center justify-between">
+              <p className="text-slate-400 text-sm">Default currency</p>
+              <span className="text-xs px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium">GBP (£)</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <CSVImportWizard 
-        open={csvImportOpen} 
+      <CSVImportWizard
+        open={csvImportOpen}
         onOpenChange={setCsvImportOpen}
         profileCurrency="GBP"
       />

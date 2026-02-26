@@ -292,7 +292,7 @@ export default function Expenses() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-slate-400">Loading...</div>
       </div>
     );
@@ -414,33 +414,31 @@ export default function Expenses() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <Card className="bg-slate-900/50 border-slate-800">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-green-400 mb-1">
-                <TrendingUp className="w-4 h-4" />
-                <span className="text-sm font-medium">Income</span>
+          <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-transparent border border-emerald-500/20 rounded-2xl p-5">
+            <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full blur-2xl opacity-20 bg-emerald-400" />
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/20">
+                <TrendingUp className="w-4 h-4 text-emerald-400" />
               </div>
-              <p className="text-2xl font-bold text-green-400">
-                {formatAmount(totalIncome)}
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-900/50 border-slate-800">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-red-400 mb-1">
-                <TrendingDown className="w-4 h-4" />
-                <span className="text-sm font-medium">Expenses</span>
+              <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Income</p>
+            </div>
+            <p className="text-2xl font-bold text-emerald-400">{formatAmount(totalIncome)}</p>
+          </div>
+          <div className="relative overflow-hidden bg-gradient-to-br from-red-500/10 via-rose-500/5 to-transparent border border-red-500/20 rounded-2xl p-5">
+            <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full blur-2xl opacity-20 bg-red-400" />
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-red-500/20 flex items-center justify-center border border-red-500/20">
+                <TrendingDown className="w-4 h-4 text-red-400" />
               </div>
-              <p className="text-2xl font-bold text-red-400">
-                {formatAmount(totalExpenses)}
-              </p>
-            </CardContent>
-          </Card>
+              <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Expenses</p>
+            </div>
+            <p className="text-2xl font-bold text-red-400">{formatAmount(totalExpenses)}</p>
+          </div>
         </div>
 
         {/* Filters */}
-        <Card className="bg-slate-900/50 border-slate-800 mb-6">
-          <CardContent className="p-4">
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl mb-6 p-4">
+          <div>
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -507,8 +505,8 @@ export default function Expenses() {
             </div>
 
             {(searchTerm || categoryFilter !== 'all' || accountFilter !== 'all' || monthFilter !== 'all' || typeFilter !== 'all') && (
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 onClick={() => {
                   setSearchTerm('');
                   setCategoryFilter('all');
@@ -521,8 +519,8 @@ export default function Expenses() {
                 Clear Filters
               </Button>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Transactions List */}
         {Object.keys(groupedTransactions).length > 0 ? (
@@ -531,18 +529,17 @@ export default function Expenses() {
               .sort(([a], [b]) => new Date(b) - new Date(a))
               .map(([date, dayTransactions]) => (
                 <div key={date}>
-                  <h3 className="text-sm font-medium text-slate-400 mb-3">
+                  <h3 className="text-xs font-medium text-slate-500 uppercase tracking-widest mb-3">
                     {formatDate(date)}
                   </h3>
-                  <Card className="bg-slate-900/50 border-slate-800">
-                    <CardContent className="p-0 divide-y divide-slate-800">
+                  <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden divide-y divide-slate-800/50">
                       {dayTransactions.map((tx) => (
-                        <div 
-                          key={tx.id} 
+                        <div
+                          key={tx.id}
                           className="p-4 flex items-center justify-between hover:bg-slate-800/30 transition-colors"
                         >
                           <div className="flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-full bg-slate-800 flex items-center justify-center text-xl">
+                            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 border border-slate-700/50 flex items-center justify-center text-xl">
                               {CATEGORY_ICONS[tx.category] || '❓'}
                             </div>
                             <div>
@@ -593,26 +590,23 @@ export default function Expenses() {
                           </div>
                         </div>
                       ))}
-                    </CardContent>
-                  </Card>
+                  </div>
                 </div>
               ))}
           </div>
         ) : (
-          <Card className="bg-slate-900/50 border-slate-800">
-            <CardContent className="py-16 text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800 flex items-center justify-center">
-                <Filter className="w-8 h-8 text-slate-400" />
-              </div>
-              <h3 className="text-lg font-medium text-white mb-2">No transactions found</h3>
-              <p className="text-slate-400">
-                {transactions.length > 0 
-                  ? 'Try adjusting your filters' 
-                  : 'No transactions available from your connected accounts'
-                }
-              </p>
-            </CardContent>
-          </Card>
+          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl py-16 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 border border-slate-700/50 flex items-center justify-center">
+              <Filter className="w-8 h-8 text-slate-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">No transactions found</h3>
+            <p className="text-slate-400">
+              {transactions.length > 0
+                ? 'Try adjusting your filters'
+                : 'No transactions available from your connected accounts'
+              }
+            </p>
+          </div>
         )}
       </div>
     </div>
