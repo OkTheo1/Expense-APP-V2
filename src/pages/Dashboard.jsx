@@ -363,6 +363,8 @@ export default function Dashboard() {
   
   // Use actual bank balance from API (current balance, not available which includes overdraft)
   const balance = getTotalBankBalance();
+  // Available balance = sum of available balances (what's actually spendable)
+  const availableBalance = bankAccounts.reduce((sum, acc) => sum + (acc.balance?.available ?? acc.balance?.current ?? 0), 0);
   const totalBudget = budgets.reduce((sum, b) => sum + b.limit, 0);
   
   // Calculate expected monthly income from recurring transactions
@@ -493,7 +495,7 @@ export default function Dashboard() {
       case 'bank-balance':
         return <BankBalanceBlock currency={currency} accounts={filteredBankAccounts} balance={filteredBankBalance} />;
       case 'balance':
-        return <BalanceBlock balance={balance} currency={currency} change={change} thisMonth={totalSpent} lastMonth={lastMonthSpent} />;
+        return <BalanceBlock balance={balance} currency={currency} change={change} thisMonth={totalSpent} lastMonth={lastMonthSpent} availableBalance={availableBalance} />;
       case 'spending':
         return <SpendingBlock spent={totalSpent} budget={totalBudget} currency={currency} />;
       case 'category-chart':

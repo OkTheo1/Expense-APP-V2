@@ -6,7 +6,7 @@ const formatCurrency = (amount, currency) => {
   return `${symbol}${amount.toLocaleString('en-GB', { minimumFractionDigits: 2 })}`;
 };
 
-export default function BalanceBlock({ balance, currency, change, thisMonth, lastMonth }) {
+export default function BalanceBlock({ balance, currency, change, thisMonth, lastMonth, availableBalance }) {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -16,9 +16,16 @@ export default function BalanceBlock({ balance, currency, change, thisMonth, las
           </div>
           <div>
             <p className="text-sm text-slate-400">Total Balance</p>
-            <p className="text-3xl font-light text-white mt-1">
-              {formatCurrency(balance, currency)}
-            </p>
+            <div className="flex items-baseline gap-3 flex-wrap mt-1">
+              <p className="text-3xl font-light text-white">
+                {formatCurrency(balance, currency)}
+              </p>
+              {availableBalance !== undefined && (
+                <p className="text-base font-medium text-green-400">
+                  {formatCurrency(availableBalance, currency)} available
+                </p>
+              )}
+            </div>
           </div>
         </div>
         <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full ${
